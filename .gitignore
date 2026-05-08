@@ -1,0 +1,23 @@
+# Environment variables
+.env
+!.env.example
+
+# moon
+.moon/cache/
+.moon/docker/
+.moon/hooks/
+
+# Virtual environment.
+.venv
+
+# OS
+.DS_Store
+
+# Python.
+__pycache__/
+
+# Data.
+data/
+
+# Logging.
+*.log
