@@ -1,0 +1,12 @@
+# Cache.
+.moon/cache/
+**/__pycache__/
+
+# Environment files
+**/.env
+
+# Logs.
+**/*.log
+
+# Virtual environments
+**/.venv/
