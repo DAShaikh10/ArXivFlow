@@ -1,3 +1,6 @@
+# Git.
+.git/
+
 # Cache.
 .moon/cache/
 **/__pycache__/
