@@ -1,0 +1,12 @@
+moon = ">=2.2.3"
+proto = ">=0.56.4"
+uv = ">=0.11.6"
+
+[settings]
+auto-clean = true # Auto-clean up the proto store in the background, by removing unused tools and outdated plugins.
+auto-install = true # Auto-install missing dependencies when running `proto run` command.
+
+# Strictly only use prototools for dependency detection.
+detect-strategy = "only-prototools"
+telemetry = false
+unstable-lockfile = true

@@ -1,0 +1,13 @@
+{
+  "folders": [
+    {
+      "name": "ArXivFlow",
+      "path": "../",
+    },
+    {
+      "name": "scraper",
+      "path": "../packages/scraper",
+    },
+  ],
+  "settings": {},
+}
