@@ -34,7 +34,7 @@ tasks:
     description: Scrape research papers from ArXiv API.
 
   dockerize:
-    command: docker build -t dashaikh10/arxivflow-scraper:latest -f packages/scraper/Dockerfile --no-cache .
+    command: docker build --platform linux/amd64 -t dashaikh10/arxivflow-scraper:latest -f packages/scraper/Dockerfile --no-cache .
     options:
       # Docker command needs to be executed from the workspace per moon's requirements.
       runFromWorkspaceRoot: true
