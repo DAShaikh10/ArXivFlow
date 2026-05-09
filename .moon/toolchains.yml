@@ -1,0 +1,6 @@
+unstable_python:
+  packageManager: "uv"
+
+unstable_uv:
+  versionFromPrototools: true
+  venvName: ".venv"
