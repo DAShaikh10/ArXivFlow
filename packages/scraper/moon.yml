@@ -1,0 +1,62 @@
+layer: tool
+language: python
+
+project:
+  name: scraper
+  description: Research paper scraper package.
+  maintainers: ["@DAShaikh10"]
+
+stack: "data"
+tags:
+  - arxiv
+  - data-annotation
+  - data-scraping
+  - data-quality
+  - python
+  - semantic-scholar
+  - uv
+
+docker:
+  file:
+    # moon requires bash, curl and uv requires python and hence this is the minimal image for build stages.
+    image: ghcr.io/astral-sh/uv:python3.14-bookworm
+    template: "packages/scraper/Dockerfile.tera"
+  scaffold:
+    configsPhaseGlobs:
+      - "pyproject.toml"
+      - "uv.lock"
+    sourcesPhaseGlobs:
+      - "src/**/*"
+
+tasks:
+  arxiv:
+    command: python -m src.lib.arxiv.main
+    description: Scrape research papers from ArXiv API.
+
+  dockerize:
+    command: docker build -t dashaikh10/arxivflow-scraper:latest -f packages/scraper/Dockerfile --no-cache .
+    options:
+      # Docker command needs to be executed from the workspace per moon's requirements.
+      runFromWorkspaceRoot: true
+
+  format:
+    command: black .
+    description: Format code using Black.
+
+  format-check:
+    command: black --check .
+    description: Check code formatting using Black.
+
+  lint:
+    command: pylint .
+    description: Lint code using Pylint.
+
+  publish:
+    command: docker push dashaikh10/arxivflow-scraper:latest
+    description: Publish the ArXivFlow Scraper Docker image to DockerHub.
+    deps:
+      - dockerize
+
+  s2:
+    command: python -m src.lib.s2.main
+    description: Enrich scraped research papers with data from Semantic Scholar API.
