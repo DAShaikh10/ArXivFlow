@@ -29,7 +29,8 @@ class SemanticScholar:
     def __init__(self) -> None:
         self.headers = {"x-api-key": config.S2_API_KEY} if config.S2_API_KEY else {}
 
-    def _return_failed_paper(self, retry_state: RetryCallState) -> Tuple[Optional[dict], bool]:
+    @staticmethod
+    def _return_failed_paper(retry_state: RetryCallState) -> Tuple[Optional[dict], bool]:
         """
         Fallback if all Tenacity retries fail.
         """

@@ -25,6 +25,15 @@ class ArXiv:
     Includes internal methods for parsing XML responses and saving results to a JSONL file.
     """
 
+    @staticmethod
+    def _return_empty_list(retry_state: RetryCallState) -> list[ArXivMetadata]:
+        """
+        Fallback if all Tenacity retries fail.
+        """
+
+        logger.error("fetch_metadata - Exhausted all retries. Last error: %s", retry_state.outcome.exception())
+        return []
+
     def _add_category_filter(self, query: str) -> str:
         """
         Append the category filter to the search query if it's not already present.
@@ -143,14 +152,6 @@ class ArXiv:
         return entries
 
     # pylint: enable=too-many-locals
-
-    def _return_empty_list(self, retry_state: RetryCallState) -> list[ArXivMetadata]:
-        """
-        Fallback if all Tenacity retries fail.
-        """
-
-        logger.error("fetch_metadata - Exhausted all retries. Last error: %s", retry_state.outcome.exception())
-        return []
 
     @retry(
         stop=stop_after_attempt(config.MAX_RETRIES),
