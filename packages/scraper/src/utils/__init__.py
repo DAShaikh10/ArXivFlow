@@ -4,5 +4,6 @@
 """
 
 from .logger import logger
+from .path import resolve_path
 
-__all__ = ["logger"]
+__all__ = ["logger", "resolve_path"]
