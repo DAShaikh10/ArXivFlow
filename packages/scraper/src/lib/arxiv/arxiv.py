@@ -7,10 +7,10 @@ import asyncio
 import json
 import os
 import xml.etree.ElementTree as ET
-from http import HTTPStatus
 
 import aiofiles
 import aiohttp
+from tenacity import RetryCallState, retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from tqdm.asyncio import tqdm
 
 from src.utils import logger, resolve_path
@@ -144,6 +144,20 @@ class ArXiv:
 
     # pylint: enable=too-many-locals
 
+    def _return_empty_list(self, retry_state: RetryCallState) -> list[ArXivMetadata]:
+        """
+        Fallback if all Tenacity retries fail.
+        """
+
+        logger.error("fetch_metadata - Exhausted all retries. Last error: %s", retry_state.outcome.exception())
+        return []
+
+    @retry(
+        stop=stop_after_attempt(config.MAX_RETRIES),
+        wait=wait_fixed(config.RETRY_DELAY),
+        retry=retry_if_exception_type((aiohttp.ClientError, asyncio.TimeoutError)),
+        retry_error_callback=_return_empty_list,
+    )
     async def fetch_metadata(self, session: aiohttp.ClientSession, url: str) -> list[ArXivMetadata]:
         """
         Fetch and parse Atom XML response with exponential backoff on failure.
@@ -161,27 +175,12 @@ class ArXiv:
 
         logger.debug("fetch_metadata - START")
 
-        max_retries = config.MAX_RETRIES
-        delay = config.RETRY_DELAY
         try:
-            for attempt in range(max_retries):
-                try:
-                    async with session.get(url) as response:
-                        response.raise_for_status()
-                        text = await response.text()
+            async with session.get(url) as response:
+                response.raise_for_status()
+                text = await response.text()
 
-                        return self._parse_metadata_response(text)
-                except aiohttp.ClientResponseError as exception:
-                    if exception.status == HTTPStatus.TOO_MANY_REQUESTS and attempt < max_retries - 1:
-                        logger.warning("Rate limited (429) for %s. Retrying in %d seconds.", url, delay)
-                        await asyncio.sleep(delay)
-                        continue
-
-                    logger.error("HTTP request failed for %s: %s", url, exception)
-                    return []
-                except aiohttp.ClientError as exception:
-                    logger.error("HTTP request failed for %s: %s", url, exception)
-                    return []
+                return self._parse_metadata_response(text)
         finally:
             logger.debug("fetch_metadata - END")
 
