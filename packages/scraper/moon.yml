@@ -35,6 +35,7 @@ tasks:
 
   dockerize:
     command: docker build --platform linux/amd64 -t dashaikh10/arxivflow-scraper:latest -f packages/scraper/Dockerfile --no-cache .
+    description: Build the ArXivFlow Scraper Docker image.
     options:
       # Docker command needs to be executed from the workspace per moon's requirements.
       runFromWorkspaceRoot: true
