@@ -1,0 +1,33 @@
+# Jobs are batch processing resources meant to run once or on a schedule.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: arxiv-api-scraper-job
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsUser: 0 # Run Docker image as user root.
+      containers:
+        - name: arxiv-api-scraper
+          image: dashaikh10/arxivflow-scraper:latest
+          command: ["python", "-m", "src.lib.arxiv.main"]
+          envFrom:
+            - secretRef:
+                name: scraper-env
+          volumeMounts:
+            - name: arxivflow-pvc
+              mountPath: /app/data # Mount the persistent volume claim to the container in the path /data.
+              subPath: arxivflow/data
+            - name: ssh-key
+              mountPath: /root/.ssh # Mount the secret with the SSH key to the container.
+      restartPolicy: Never
+
+      volumes:
+        - name: arxivflow-pvc
+          persistentVolumeClaim:
+            claimName: arxivflow-pvc
+        - name: ssh-key
+          secret:
+            secretName: ssh-key-secret
+  backoffLimit: 2
