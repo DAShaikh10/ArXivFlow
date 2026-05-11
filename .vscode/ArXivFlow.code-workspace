@@ -5,8 +5,8 @@
       "path": "../",
     },
     {
-      "name": "scraper",
-      "path": "../packages/scraper",
+      "name": "crucible",
+      "path": "../packages/crucible",
     },
   ],
   "settings": {},

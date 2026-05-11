@@ -10,18 +10,18 @@ spec:
         runAsUser: 0 # Run Docker image as user root.
       containers:
         - name: s2-api-scraper
-          image: dashaikh10/arxivflow-scraper:latest
+          image: dashaikh10/arxivflow-crucible:latest
           command: ["python", "-m", "src.lib.s2.main"]
           envFrom:
             - secretRef:
-                name: scraper-env
+                name: crucible-env
           volumeMounts:
             - name: arxivflow-pvc
               mountPath: /app/data # Mount the persistent volume claim to the container in the path /data.
               subPath: arxivflow/data
             - name: arxivflow-pvc
               mountPath: /app/src/logs
-              subPath: arxivflow/scraper/logs
+              subPath: arxivflow/crucible/logs
             - name: ssh-key
               mountPath: /root/.ssh # Mount the secret with the SSH key to the container.
       restartPolicy: Never

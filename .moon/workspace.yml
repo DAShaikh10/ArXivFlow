@@ -2,7 +2,7 @@
 # Accepts a list of globs, a mapping of projects to relative file paths,
 # or both values.
 projects:
-  scraper: "packages/scraper"
+  crucible: "packages/crucible"
 
 codeowners:
   globalPaths:

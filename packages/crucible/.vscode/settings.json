@@ -13,7 +13,7 @@
   "files.trimTrailingWhitespace": true,
   // Ensures every file ends with a blank line as per POSIX/standard conventions.
   "files.insertFinalNewline": true,
-  "python.defaultInterpreterPath": "${workspaceFolder:scraper}/.venv/bin/python",
+  "python.defaultInterpreterPath": "${workspaceFolder:crucible}/.venv/bin/python",
   "editor.formatOnPaste": true,
   "python.analysis.inlayHints.functionReturnTypes": true,
   "python.analysis.inlayHints.pytestParameters": true,

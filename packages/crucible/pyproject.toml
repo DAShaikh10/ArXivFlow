@@ -1,5 +1,5 @@
 [project]
-name = "scraper"
+name = "crucible"
 version = "1.0.0"
 description = "Research paper scraper package"
 readme = "README.md"

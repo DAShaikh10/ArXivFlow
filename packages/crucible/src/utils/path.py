@@ -14,8 +14,8 @@ def resolve_path(current_dir: str, file: str) -> str:
     """
 
     # Check if we are running in the local monorepo or standard Docker environment.
-    if "packages/scraper" in current_dir.replace("\\", "/"):
-        # Local setup: E.g. ArXivFlow/packages/scraper/src/lib/arxiv/arxiv.py
+    if "packages/crucible" in current_dir.replace("\\", "/"):
+        # Local setup: E.g. ArXivFlow/packages/crucible/src/lib/arxiv/arxiv.py
         project_root = os.path.abspath(os.path.join(current_dir, "../../../../.."))
     else:
         # Docker setup: E.g. /app/src/lib/arxiv/arxiv.py

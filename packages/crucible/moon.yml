@@ -2,7 +2,7 @@ layer: tool
 language: python
 
 project:
-  name: scraper
+  name: crucible
   description: Research paper scraper package.
   maintainers: ["@DAShaikh10"]
 
@@ -20,7 +20,7 @@ docker:
   file:
     # moon requires bash, curl and uv requires python and hence this is the minimal image for build stages.
     image: ghcr.io/astral-sh/uv:python3.14-bookworm
-    template: "packages/scraper/Dockerfile.tera"
+    template: "packages/crucible/Dockerfile.tera"
   scaffold:
     configsPhaseGlobs:
       - "pyproject.toml"
@@ -33,9 +33,15 @@ tasks:
     command: python -m src.lib.arxiv.main
     description: Scrape research papers from ArXiv API.
 
+  clean:
+    command: bash
+    args:
+      - scripts/clean.sh
+    description: Clean virtualenvs, Python cache, and uv lockfiles.
+
   dockerize:
-    command: docker build --platform linux/amd64 -t dashaikh10/arxivflow-scraper:latest -f packages/scraper/Dockerfile --no-cache .
-    description: Build the ArXivFlow Scraper Docker image.
+    command: docker build --platform linux/amd64 -t dashaikh10/arxivflow-crucible:latest -f packages/crucible/Dockerfile --no-cache .
+    description: Build the ArXivFlow Crucible Docker image.
     options:
       # Docker command needs to be executed from the workspace per moon's requirements.
       runFromWorkspaceRoot: true
@@ -53,11 +59,15 @@ tasks:
     description: Lint code using Pylint.
 
   publish:
-    command: docker push dashaikh10/arxivflow-scraper:latest
-    description: Publish the ArXivFlow Scraper Docker image to DockerHub.
+    command: docker push dashaikh10/arxivflow-crucible:latest
+    description: Publish the ArXivFlow Crucible Docker image to DockerHub.
     deps:
       - dockerize
 
   s2:
     command: python -m src.lib.s2.main
     description: Enrich scraped research papers with data from Semantic Scholar API.
+
+  sync:
+    command: uv sync
+    description: Sync (create .venv, install missing dependencies) the project environment (generate / with the lockfile).

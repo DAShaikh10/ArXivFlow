@@ -11,7 +11,7 @@ from datetime import datetime
 
 # Determine the module name running.
 main_module = sys.modules.get("__main__")
-module_name = "scraper"
+module_name = "crucible"
 if main_module:
     if hasattr(main_module, "__spec__") and main_module.__spec__:
         module_name = main_module.__spec__.name

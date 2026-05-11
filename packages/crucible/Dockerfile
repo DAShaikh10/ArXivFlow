@@ -16,7 +16,7 @@ FROM base AS skeleton
 
 # Copy entire repository and scaffold.
 COPY . .
-RUN moon docker scaffold scraper
+RUN moon docker scaffold crucible
 
 #### BUILD STAGE
 #### Builds the project.
@@ -43,10 +43,10 @@ FROM python:3.14-alpine AS runner
 WORKDIR /app
 
 # Copy the pruned virtual environment.
-COPY --from=build /app/packages/scraper/.venv /app/.venv
+COPY --from=build /app/packages/crucible/.venv /app/.venv
 
 # Copy the pruned application sources.
-COPY --from=build /app/packages/scraper/src /app/src
+COPY --from=build /app/packages/crucible/src /app/src
 
 # Make sure we use the virtualenv.
 ENV PATH="/app/.venv/bin:$PATH"

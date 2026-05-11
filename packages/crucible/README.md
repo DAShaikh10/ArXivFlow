@@ -1,4 +1,4 @@
-# Scraper Package
+# Crucible Package
 
 Scrape research papers from [ArXiv API][arxiv-api-url] and enrich their metadata using [Semantic Scholar API][semantic-scholar-api-url].
 
@@ -10,7 +10,7 @@ Scrape research papers from [ArXiv API][arxiv-api-url] and enrich their metadata
 
 <div align = "center">
 
-<img src = "assets/metadata.png" alt = "Scraper Project Summary"/>
+<img src = "assets/metadata.png" alt = "Crucible Project Summary"/>
 
 </div>
 
@@ -24,14 +24,14 @@ The project uses [Moon](https://moonrepo.dev/) as a task runner and project mana
 
 <div align = "center">
 
-<img src = "assets/tasks.png" alt = "Scraper Project Available Tasks"/>
+<img src = "assets/tasks.png" alt = "Crucible Project Available Tasks"/>
 
 </div>
 
 Run standard task commands from the workspace root:
 
 ```bash
-moon run scraper:TASK_NAME
+moon run crucible:TASK_NAME
 ```
 
 ## Python Management with UV
@@ -77,7 +77,7 @@ Ensure your copied `.env` properties have real values filled in before executing
 │ ├── `file_io.py`            # helpers for streaming file read-writes
 │ ├── `logger.py`             # logging setup and helpers
 │ └── `path.py`               # path utilities used across the package
-├── `Dockerfile`              # container image build for the scraper service
+├── `Dockerfile`              # container image build for the crucible service(s)
 ├── `Dockerfile.tera`         # templated Dockerfile used by the moon build system
 ├── `pyproject.toml`          # Python project configuration and dependencies
 └── `README.md`               # this package README
@@ -93,22 +93,22 @@ A minimal Python image (`ghcr.io/astral-sh/uv:python3.14-bookworm`) is defined d
 
 ## Cluster Usage
 
-Build the ArXivFlow Scraper Docker image using the Moon template flow:
+Build the ArXivFlow Crucible Docker image using the Moon template flow:
 
 ```bash
-moon run scraper:dockerize # Run from ArXivFlow workspace folder.
+moon run crucible:dockerize # Run from ArXivFlow workspace folder.
 ```
 
-Publish the latest arxiv-scraper image to DockerHub:
+Publish the latest arxiv-crucible image to DockerHub:
 
 ```bash
-moon run scraper:publish # Run from ArXivFlow workspace folder.
+moon run crucible:publish # Run from ArXivFlow workspace folder.
 ```
 
 Copy `.env` to Kubernetes cluster namespace:
 
 ```bash
-kubectl create secret generic scraper-env --from-env-file=./.env
+kubectl create secret generic crucible-env --from-env-file=./.env
 ```
 
 Run the scrape jobs individually, one after the other, as the S2 job requires a dataset prepared by the ArXiv scrape job:
@@ -134,7 +134,7 @@ kubectl delete -f k8s/scrape-s2-api.yml
 <!-- REFERENCES -->
 
 [arxiv-api-url]: https://info.arxiv.org/help/api/basics.html
-[arxivflow-scarper-image-shield]: https://img.shields.io/docker/image-size/dashaikh10/arxivflow-scraper
+[arxivflow-scarper-image-shield]: https://img.shields.io/docker/image-size/dashaikh10/arxivflow-crucible
 [s2-influential-citation-count-url]: https://www.semanticscholar.org/faq/influential-citations
 [semantic-scholar-api-url]: https://www.semanticscholar.org/product/api
 [uv-url]: https://github.com/astral-sh/uv

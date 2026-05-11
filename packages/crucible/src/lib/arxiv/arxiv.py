@@ -209,7 +209,7 @@ class ArXiv:
         """
         Bulk fetch and save research paper metadata from [ArXiv](https://arxiv.org/) asynchronously.
 
-        Search is performed based on specified `category` **and** `date` range filters _(Read from the `scraper/.env`)_
+        Search is performed based on specified `category` **and** `date` range filters _(Read from the `crucible/.env`)_
 
         The results are saved to a JSONL file to support streaming large datasets. _(`ArXiv/data/raw_dataset.jsonl`)_
 
