@@ -4,6 +4,8 @@ Scrape research papers from [ArXiv API][arxiv-api-url] and enrich their metadata
 
 <div align = "center">
 
+![Moonrepo][moonrepo-shield]
+![UV][uv-shield]
 ![Docker Image Size][arxivflow-scarper-image-shield]
 
 </div>
@@ -136,7 +138,9 @@ kubectl delete -f k8s/scrape-s2-api.yml
 <!-- REFERENCES -->
 
 [arxiv-api-url]: https://info.arxiv.org/help/api/basics.html
-[arxivflow-scarper-image-shield]: https://img.shields.io/docker/image-size/dashaikh10/arxivflow-crucible
+[arxivflow-scarper-image-shield]: https://img.shields.io/docker/image-size/dashaikh10/arxivflow-crucible?style=flat&label=arxivflow-crucible
+[moonrepo-shield]: https://img.shields.io/badge/Moonrepo-Informational?style=flat&logo=moonrepo&labelColor=fff&color=%236f53f3
 [s2-influential-citation-count-url]: https://www.semanticscholar.org/faq/influential-citations
 [semantic-scholar-api-url]: https://www.semanticscholar.org/product/api
+[uv-shield]: https://img.shields.io/badge/UV-Informational?style=flat&logo=uv&labelColor=fff&color=%23de5fe9
 [uv-url]: https://github.com/astral-sh/uv
