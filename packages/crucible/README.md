@@ -58,6 +58,8 @@ Ensure your copied `.env` properties have real values filled in before executing
 ├── k8s/ — Kubernetes manifests
 │ ├── `scrape-arxiv-api.yml`  # Kubernetes job/manifest for scraping arXiv API
 │ └── `scrape-s2-api.yml`     # Kubernetes job/manifest for scraping Semantic Scholar API
+├── scripts/
+│ └── `clean.sh`              # cleanup helper for local or containerized runs
 ├── src/
 │ ├── lib/
 │ │ ├── arxiv/
