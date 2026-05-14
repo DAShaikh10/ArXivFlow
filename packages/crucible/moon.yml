@@ -39,6 +39,10 @@ tasks:
       - scripts/clean.sh
     description: Clean virtualenvs, Python cache, and uv lockfiles.
 
+  data-quality-check:
+    command: uv run -m streamlit run src/lib/quality/pre_main.py
+    description: Open the pre-annotation Quality Check Streamlit dashboard.
+
   dockerize:
     command: docker build --platform linux/amd64 -t dashaikh10/arxivflow-crucible:latest -f packages/crucible/Dockerfile --no-cache .
     description: Build the ArXivFlow Crucible Docker image.
