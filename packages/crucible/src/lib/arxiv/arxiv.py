@@ -182,6 +182,9 @@ class ArXiv:
                 text = await response.text()
 
                 return self._parse_metadata_response(text)
+        except (aiohttp.ClientError, asyncio.TimeoutError) as exception:
+            logger.error("fetch_metadata - Request failed: %s. Retrying...", exception)
+            raise
         finally:
             logger.debug("fetch_metadata - END")
 
@@ -229,11 +232,18 @@ class ArXiv:
             logger.debug("Adding date range filter: %s to %s", config.START_DATE, config.END_DATE)
             url = self._add_date_range_filter(url)
 
+        semaphore = asyncio.Semaphore(config.CONCURRENCY)
+
+        async def fetch_with_semaphore(session: aiohttp.ClientSession, fetch_url: str) -> list[ArXivMetadata]:
+            async with semaphore:
+                await asyncio.sleep(config.RETRY_DELAY)  # Delay between requests to respect API rate limits.
+                return await self.fetch_metadata(session, fetch_url)
+
         tasks = []
         # https://export.arxiv.org/api/query?search_query=au:del_maestro+AND+submittedDate:[201501010600+TO+202512310600]&start=0&max_results=10
         async with aiohttp.ClientSession() as session:
             for idx in range(0, config.TOTAL_RESULTS, config.BATCH_SIZE):  # ArXiv API is 0-indexed.
-                tasks.append(self.fetch_metadata(session, url + f"&start={idx}&max_results={config.BATCH_SIZE}"))
+                tasks.append(fetch_with_semaphore(session, url + f"&start={idx}&max_results={config.BATCH_SIZE}"))
 
             data = await tqdm.gather(*tasks, desc="Fetching ArXiv Metadata")
             await self._save_data([item for sublist in data for item in sublist])
