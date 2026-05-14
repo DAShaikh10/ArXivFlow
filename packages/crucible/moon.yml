@@ -3,7 +3,7 @@ language: python
 
 project:
   name: crucible
-  description: Research paper scraper package.
+  description: Research paper scraper, quality checks, and annotation package.
   maintainers: ["@DAShaikh10"]
 
 stack: "data"
