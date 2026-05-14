@@ -4,6 +4,7 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-yaml # Validates YAML syntax
+        args: [--allow-multiple-documents]
       - id: check-added-large-files # Prevents accidentally committing giant files
       - id: check-merge-conflict # Checks for unresolved merge conflicts
       - id: detect-private-key # Detects if you accidentally commit a private key (e.g. AWS, RSA)
