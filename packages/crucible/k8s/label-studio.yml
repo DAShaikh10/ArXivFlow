@@ -1,0 +1,56 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: label-studio
+  labels:
+    app: label-studio
+spec:
+  replicas: 1 # Single pod that automatically restarts on crash.
+  selector:
+    matchLabels:
+      app: label-studio
+  template:
+    metadata:
+      labels:
+        app: label-studio
+    spec:
+      containers:
+        - name: label-studio
+          image: heartexlabs/label-studio:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: LABEL_STUDIO_LOCAL_FILES_SERVING_ENABLED
+              value: "true"
+            - name: LABEL_STUDIO_LOCAL_FILES_DOCUMENT_ROOT
+              value: "/label-studio"
+          volumeMounts:
+            - name: arxivflow-pvc
+              mountPath: /label-studio/data
+              subPath: arxivflow/data
+          resources:
+            requests:
+              cpu: "1"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "4Gi"
+          securityContext:
+            runAsUser: 0 # If required PVC cluster to read/write.
+      volumes:
+        - name: arxivflow-pvc
+          persistentVolumeClaim:
+            claimName: arxivflow-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: label-studio
+spec:
+  selector:
+    app: label-studio
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  type: ClusterIP
