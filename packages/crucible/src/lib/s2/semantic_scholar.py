@@ -92,7 +92,7 @@ class SemanticScholar:
         return parsed_references
 
     async def enrich_batch(
-        self, session: aiohttp.ClientSession, batch: List[ArXivMetadata], concurrency: int = 3
+        self, session: aiohttp.ClientSession, batch: List[ArXivMetadata]
     ) -> Tuple[List[ArXivMetadata], List[ArXivMetadata]]:
         """
         Enrich a batch of ArXiv metadata entries using the provided aiohttp session.
@@ -114,7 +114,9 @@ class SemanticScholar:
 
             return paper, is_retryable
 
-        semaphore = asyncio.Semaphore(concurrency)
+        # NOTE: We are restricted to 1 request per second, hence concurrency of 1 & delay of 3 seconds between batches.
+        # But we implement concurrency and delay to make it flexible for future use.
+        semaphore = asyncio.Semaphore(config.CONCURRENCY)
 
         async def bound_process(paper: ArXivMetadata) -> Tuple[ArXivMetadata, bool]:
             async with semaphore:
@@ -130,15 +132,7 @@ class SemanticScholar:
 
         return enriched_batch, failed_batch
 
-    # pylint: disable=too-many-arguments, too-many-positional-arguments
-    async def enrich_dataset(
-        self,
-        dataset_path: str,
-        out_path: str,
-        batch_size: int = 100,
-        concurrency: int = 3,
-        delay_between_batches: float = 0.0,
-    ) -> None:
+    async def enrich_dataset(self, dataset_path: str, out_path: str) -> None:
         """
         Stream `dataset_path` (JSONL), enrich in batches and write results to `out_path`.
         Failed papers will be logged as errors.
@@ -146,9 +140,6 @@ class SemanticScholar:
         Args:
             dataset_path (str): Path to input JSONL file (one JSON object per line).
             out_path (str): Path to write enriched JSONL results.
-            batch_size (int): Number of records to process per batch.
-            concurrency (int): Max concurrent requests when enriching a batch.
-            delay_between_batches (float): Optional delay in second(s) between batches to ease rate limits.
         """
 
         logger.debug("enrich_dataset - START")
@@ -163,8 +154,8 @@ class SemanticScholar:
                 async for paper in stream_jsonl(dataset_path):
                     batch.append(paper)
 
-                    if len(batch) >= batch_size:
-                        enriched, failed = await self.enrich_batch(session, batch, concurrency)
+                    if len(batch) >= config.BATCH_SIZE:
+                        enriched, failed = await self.enrich_batch(session, batch)
                         await write_jsonl_batch(out_path, enriched, append=True)
                         for failed_paper in failed:
                             logger.error(
@@ -173,12 +164,12 @@ class SemanticScholar:
 
                         pbar.update(len(batch))
                         batch = []
-                        if delay_between_batches:
-                            await asyncio.sleep(delay_between_batches)
+                        if config.DELAY_BETWEEN_BATCHES:
+                            await asyncio.sleep(config.DELAY_BETWEEN_BATCHES)
 
                 # Final partial batch.
                 if batch:
-                    enriched, failed = await self.enrich_batch(session, batch, concurrency)
+                    enriched, failed = await self.enrich_batch(session, batch)
                     await write_jsonl_batch(out_path, enriched, append=True)
                     for failed_paper in failed:
                         logger.error(
@@ -187,5 +178,3 @@ class SemanticScholar:
                     pbar.update(len(batch))
 
         logger.debug("enrich_dataset - END")
-
-    # pylint: enable=too-many-arguments, too-many-positional-arguments
