@@ -36,6 +36,25 @@ async def stream_jsonl(file_path: str, mode: str = "r", encoding: str = "utf-8")
                 logger.error("stream_jsonl - Failed to decode line: %s. Error: %s", line, exception)
 
 
+async def write_json(file_path: str, data: dict, encoding: str = "utf-8") -> None:
+    """
+    Write dictionary to JSON file.
+
+    This function is useful for writing structured reports or summaries and not large datasets.
+    Use `write_jsonl_batch()` for writing large datasets in JSONL format.
+
+    Args:
+        file_path (str): Path to the output JSON file.
+        data (dict): The dictionary to write.
+        encoding (str): Encoding to use when opening the file.
+    """
+
+    os.makedirs(os.path.dirname(file_path), exist_ok=True)
+
+    async with aiofiles.open(file_path, "w", encoding=encoding) as out_f:
+        await out_f.write(json.dumps(data, indent=2, ensure_ascii=False))
+
+
 async def write_jsonl_batch(file_path: str, batch: List[dict], append: bool = True, encoding: str = "utf-8") -> None:
     """
     Write or append a batch of dictionaries to a JSONL file.
