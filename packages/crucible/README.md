@@ -114,7 +114,7 @@ This package builds optimized, fully containerized production images using multi
 
 Moon is configured to scaffold our workspace using `.tera` templates (`Dockerfile.tera`). This enables Moon to programmatically construct isolated execution contexts by selectively copying specific configuration files (`pyproject.toml`, `uv.lock`) and scopes (`src/**/*`) prior to dependency resolutions. This significantly accelerates build steps using layer caching and allows pruning extraneous project files.
 
-A minimal Python image (`ghcr.io/astral-sh/uv:python3.14-bookworm`) is defined directly via the template build stages to prepare dependencies before shedding development packages entirely for an optimal, lightweight Alpine-based runner (`python:3.14-alpine`).
+A minimal Python image (`python3.14-alpine`) is defined directly via the template build stages to prepare dependencies before shedding development packages entirely for an optimal, lightweight Alpine-based runner.
 
 ---
 
