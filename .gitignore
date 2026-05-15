@@ -21,3 +21,6 @@ data/
 
 # Logging.
 *.log
+
+# WandB.
+wandb/

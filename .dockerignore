@@ -13,3 +13,6 @@
 
 # Virtual environments
 **/.venv/
+
+# WandB files.
+**/wandb/
