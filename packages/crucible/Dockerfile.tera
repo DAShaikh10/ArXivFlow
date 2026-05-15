@@ -2,8 +2,14 @@
 #### Installs moon.
 
 # Image contains bash, curl, python3.14 and uv.
-FROM ghcr.io/astral-sh/uv:python3.14-bookworm AS base
+FROM python:3.14-alpine AS base
 WORKDIR /app
+
+# Install bash, curl, certificates, and git so moon can be fetched safely.
+RUN apk add --no-cache bash curl ca-certificates git
+
+# Grab the official precompiled uv binaries directly from Astral's image.
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 
 # Install moon binary.
 RUN curl -fsSL https://moonrepo.dev/install/moon.sh | bash

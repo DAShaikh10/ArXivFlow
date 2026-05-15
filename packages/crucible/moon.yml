@@ -19,7 +19,7 @@ tags:
 docker:
   file:
     # moon requires bash, curl and uv requires python and hence this is the minimal image for build stages.
-    image: ghcr.io/astral-sh/uv:python3.14-bookworm
+    image: python:3.14-alpine
     template: "packages/crucible/Dockerfile.tera"
   scaffold:
     configsPhaseGlobs:
