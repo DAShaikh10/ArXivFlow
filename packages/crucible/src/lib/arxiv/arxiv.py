@@ -13,6 +13,8 @@ import aiohttp
 from tenacity import RetryCallState, retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from tqdm.asyncio import tqdm
 
+import wandb
+
 from src.utils import logger, resolve_path
 
 from . import config
@@ -54,7 +56,10 @@ class ArXiv:
         # If the search query is empty, add the category filter.
         if query.endswith("search_query="):
             query += f"cat:{config.CATEGORY}"
+
             logger.info("_add_category_filter - Added search query with category filter: '%s'", query)
+            wandb.log({"status": f"bulk_fetch - Added category filter: {config.CATEGORY}"})
+
             return query
 
         # If the search query already has some filters, add the category filter with 'AND'.
@@ -63,7 +68,10 @@ class ArXiv:
         # Ref.: https://info.arxiv.org/help/api/user-manual.html#query_details
         if query.find("search_query=") != -1:
             query += f"+AND+cat:{config.CATEGORY}"
+
             logger.info("_add_category_filter - Updated search query with category filter: '%s'", query)
+            wandb.log({"status": f"bulk_fetch - Updated search query with category filter: {config.CATEGORY}"})
+
             return query
 
         raise ValueError("Search query does not match expected patterns. Cannot add category filter.")
@@ -88,7 +96,10 @@ class ArXiv:
         # If the search query is empty, add the date range filter.
         if query.endswith("search_query="):
             query += f"submittedDate:[{config.START_DATE}+TO+{config.END_DATE}]"
+
             logger.info("_add_date_range_filter - Added search query with date range filter: '%s'", query)
+            wandb.log({"status": f"bulk_fetch - Added date range filter: {config.START_DATE} to {config.END_DATE}"})
+
             return query
 
         # If the search query already has some filters, add the date range filter with 'AND'.
@@ -97,7 +108,15 @@ class ArXiv:
         # Ref.: https://info.arxiv.org/help/api/user-manual.html#query_details
         if query.find("search_query=") != -1:
             query += f"+AND+submittedDate:[{config.START_DATE}+TO+{config.END_DATE}]"
+
             logger.info("_add_date_range_filter - Updated search query with date range filter: '%s'", query)
+            wandb.log(
+                {
+                    "status": "bulk_fetch - Updated search query with date range filter: "
+                    + f"{config.START_DATE} to {config.END_DATE}"
+                }
+            )
+
             return query
 
         raise ValueError("Search query does not match expected patterns. Cannot add date range filter.")
@@ -118,6 +137,7 @@ class ArXiv:
             root = ET.fromstring(text)
         except ET.ParseError as exception:
             logger.error("_parse_metadata_response - Failed to parse XML response: %s", exception)
+            wandb.log({"status": f"_parse_metadata_response - Failed to parse XML response: {exception}"})
             return []
 
         ns = {"atom": "http://www.w3.org/2005/Atom"}
@@ -175,6 +195,7 @@ class ArXiv:
         """
 
         logger.debug("fetch_metadata - START")
+        wandb.log({"status": "fetch_metadata - START"})
 
         try:
             async with session.get(url) as response:
@@ -184,13 +205,15 @@ class ArXiv:
                 return self._parse_metadata_response(text)
         except (aiohttp.ClientError, asyncio.TimeoutError) as exception:
             logger.error("fetch_metadata - Request failed: %s. Retrying...", exception)
+            wandb.log({"status": f"fetch_metadata - Request failed: {exception}. Retrying..."})
             raise
         finally:
             logger.debug("fetch_metadata - END")
+            wandb.log({"status": "fetch_metadata - END"})
 
     async def _save_data(self, data: list[ArXivMetadata]) -> None:
         """
-        Save the fetched metadata to a JSON file.
+        Save the fetched metadata to a JSONL file.
 
         Args:
             data (list[ArXivMetadata]): The list of metadata dictionaries to save.
@@ -206,7 +229,13 @@ class ArXiv:
             for item in data:
                 await f.write(json.dumps(item) + "\n")
 
+        # Save output dataset as a WandB Artifact.
+        artifact = wandb.Artifact("arxiv_raw_dataset", type="dataset")
+        artifact.add_file(dataset_path)
+        wandb.log_artifact(artifact)
+
         logger.info("Successfully saved %s records to %s", len(data), dataset_path)
+        wandb.log({"status": f"Successfully saved {len(data)} records to {dataset_path}"})
 
     async def bulk_fetch_metadata(self) -> None:
         """
@@ -221,31 +250,45 @@ class ArXiv:
                         and cannot be modified to include the category or date range filters.
         """
 
+        wandb.log({"status": "bulk_fetch - START"})
         logger.debug("bulk_fetch_metadata - START")
 
-        # Build the base URL with filters based on the provided configuration.
-        url = f"{config.API_BASE_URL}?search_query="
-        if config.CATEGORY:
-            logger.debug("Adding category filter: %s", config.CATEGORY)
-            url = self._add_category_filter(url)
-        if config.START_DATE and config.END_DATE:
-            logger.debug("Adding date range filter: %s to %s", config.START_DATE, config.END_DATE)
-            url = self._add_date_range_filter(url)
+        try:
+            # Build the base URL with filters based on the provided configuration.
+            url = f"{config.API_BASE_URL}?search_query="
+            if config.CATEGORY:
+                logger.debug("Adding category filter: %s", config.CATEGORY)
+                wandb.log({"status": f"bulk_fetch - Adding category filter: {config.CATEGORY}"})
 
-        semaphore = asyncio.Semaphore(config.CONCURRENCY)
+                url = self._add_category_filter(url)
+            if config.START_DATE and config.END_DATE:
+                logger.debug("Adding date range filter: %s to %s", config.START_DATE, config.END_DATE)
+                wandb.log(
+                    {"status": f"bulk_fetch - Adding date range filter: {config.START_DATE} to {config.END_DATE}"}
+                )
 
-        async def fetch_with_semaphore(session: aiohttp.ClientSession, fetch_url: str) -> list[ArXivMetadata]:
-            async with semaphore:
-                await asyncio.sleep(config.RETRY_DELAY)  # Delay between requests to respect API rate limits.
-                return await self.fetch_metadata(session, fetch_url)
+                url = self._add_date_range_filter(url)
 
-        tasks = []
-        # https://export.arxiv.org/api/query?search_query=au:del_maestro+AND+submittedDate:[201501010600+TO+202512310600]&start=0&max_results=10
-        async with aiohttp.ClientSession() as session:
-            for idx in range(0, config.TOTAL_RESULTS, config.BATCH_SIZE):  # ArXiv API is 0-indexed.
-                tasks.append(fetch_with_semaphore(session, url + f"&start={idx}&max_results={config.BATCH_SIZE}"))
+            semaphore = asyncio.Semaphore(config.CONCURRENCY)
+            logger.debug("Using concurrency level: %s", config.CONCURRENCY)
+            wandb.log({"status": f"bulk_fetch - Using concurrency level: {config.CONCURRENCY}"})
 
-            data = await tqdm.gather(*tasks, desc="Fetching ArXiv Metadata")
-            await self._save_data([item for sublist in data for item in sublist])
+            async def fetch_with_semaphore(session: aiohttp.ClientSession, fetch_url: str) -> list[ArXivMetadata]:
+                async with semaphore:
+                    await asyncio.sleep(config.RETRY_DELAY)  # Delay between requests to respect API rate limits.
+                    return await self.fetch_metadata(session, fetch_url)
 
-        logger.debug("bulk_fetch_metadata - END")
+            tasks = []
+            # https://export.arxiv.org/api/query?search_query=au:del_maestro+AND+submittedDate:[201501010600+TO+202512310600]&start=0&max_results=10
+            async with aiohttp.ClientSession() as session:
+                for idx in range(0, config.TOTAL_RESULTS, config.BATCH_SIZE):  # ArXiv API is 0-indexed.
+                    tasks.append(fetch_with_semaphore(session, url + f"&start={idx}&max_results={config.BATCH_SIZE}"))
+
+                data = await tqdm.gather(*tasks, desc="Fetching ArXiv Metadata")
+                await self._save_data([item for sublist in data for item in sublist])
+        except (ValueError, OSError) as exception:
+            logger.error("bulk_fetch_metadata - Failed with exception: %s", exception)
+            wandb.log({"status": f"bulk_fetch - Failed with exception: {exception}"})
+        finally:
+            wandb.log({"status": "bulk_fetch - END"})
+            logger.debug("bulk_fetch_metadata - END")
