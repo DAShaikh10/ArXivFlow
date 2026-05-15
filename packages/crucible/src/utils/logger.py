@@ -29,7 +29,7 @@ log_filename = os.path.join(LOG_DIR, f"{module_name}_{timestamp}.log")
 
 # Configure logging.
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.FileHandler(log_filename, mode="w+"), logging.StreamHandler()],
     force=True,  # Ensure we override if basicConfig was already called.
