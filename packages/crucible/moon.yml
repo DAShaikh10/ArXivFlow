@@ -27,6 +27,7 @@ docker:
       - "uv.lock"
     sourcesPhaseGlobs:
       - "src/**/*"
+      - "!src/lib/quality/*"
 
 tasks:
   arxiv:
