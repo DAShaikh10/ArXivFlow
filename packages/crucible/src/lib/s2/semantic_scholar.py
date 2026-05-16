@@ -11,6 +11,7 @@ from http import HTTPStatus
 from typing import List, Optional, Tuple
 
 import aiohttp
+from aiolimiter import AsyncLimiter
 from tenacity import RetryCallState, retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from tqdm.asyncio import tqdm
 
@@ -30,49 +31,54 @@ class SemanticScholar:
 
     def __init__(self) -> None:
         self.headers = {"x-api-key": config.S2_API_KEY} if config.S2_API_KEY else {}
+        self.rate_limiter = AsyncLimiter(max_rate=config.CONCURRENCY, time_period=config.DELAY_BETWEEN_BATCHES)
 
     @staticmethod
-    def _return_failed_paper(retry_state: RetryCallState) -> Tuple[Optional[dict], bool]:
+    def _return_failed_batch(retry_state: RetryCallState) -> Tuple[Optional[list], bool]:
         """
         Fallback if all Tenacity retries fail.
         """
 
-        logger.error("_fetch_paper_data - Exhausted all retries. Last error: %s", retry_state.outcome.exception())
+        logger.error("_fetch_batch_data - Exhausted all retries. Last error: %s", retry_state.outcome.exception())
         return None, True
 
     @retry(
         stop=stop_after_attempt(config.MAX_RETRIES),
         wait=wait_fixed(config.RETRY_DELAY),
         retry=retry_if_exception_type((aiohttp.ClientError, asyncio.TimeoutError)),
-        retry_error_callback=_return_failed_paper,
+        retry_error_callback=_return_failed_batch,
     )
-    async def _fetch_paper_data(self, session: aiohttp.ClientSession, arxiv_url: str) -> Tuple[Optional[dict], bool]:
+    async def _fetch_batch_data(
+        self, session: aiohttp.ClientSession, arxiv_urls: List[str]
+    ) -> Tuple[Optional[list], bool]:
         """
-        Fetch metadata for a single paper by ArXiv URL from Semantic Scholar API.
+        Fetch metadata for a batch of papers by ArXiv URLs from Semantic Scholar API.
 
         Args:
             session (aiohttp.ClientSession): The aiohttp session for making requests.
-            arxiv_url (str): The ArXiv URL of the paper to fetch.
+            arxiv_urls (List[str]): A list of ArXiv URLs of the papers to fetch.
 
         Returns:
-            Tuple[Optional[dict], bool]: A tuple containing the paper's metadata if found (else None),
+            Tuple[Optional[list], bool]: A tuple containing the list of paper metadata if successful (else None),
                                          and a boolean indicating if it is a retryable failure.
         """
 
-        url = f"{config.API_BASE_URL}/url:{arxiv_url}?fields={config.API_FIELDS}"
+        url = f"{config.API_BASE_URL}/batch?fields={config.API_FIELDS}"
+        payload = {"ids": [f"URL:{url}" for url in arxiv_urls]}
 
         try:
-            async with session.get(url, headers=self.headers) as response:
-                if response.status == HTTPStatus.NOT_FOUND:
-                    logger.warning("_fetch_paper_data - Paper %s not found on Semantic Scholar.", arxiv_url)
-                    wandb.log({"warning": f"Paper {arxiv_url} not found on Semantic Scholar."})
-                    return None, False
+            async with self.rate_limiter:
+                async with session.post(url, json=payload, headers=self.headers) as response:
+                    if response.status == HTTPStatus.NOT_FOUND:
+                        logger.warning("_fetch_batch_data - Some papers not found on Semantic Scholar.")
+                        wandb.log({"warning": "Some papers not found on Semantic Scholar."})
+                        return None, False
 
-                response.raise_for_status()
-                return await response.json(), False
+                    response.raise_for_status()
+                    return await response.json(), False
         except (aiohttp.ClientError, asyncio.TimeoutError) as exception:
-            logger.error("_fetch_paper_data - Request failed: %s. Retrying...", exception)
-            wandb.log({"status": f"_fetch_paper_data - Request failed: {exception}. Retrying..."})
+            logger.error("_fetch_batch_data - Request failed: %s. Retrying...", exception)
+            wandb.log({"status": f"_fetch_batch_data - Request failed: {exception}. Retrying..."})
             raise
 
     def _parse_references(self, s2_references: list) -> List[Reference]:
@@ -117,32 +123,36 @@ class SemanticScholar:
         logger.debug("enrich_batch - START")
         wandb.log({"status": "enrich_batch - START"})
 
-        async def process_paper(paper: ArXivMetadata) -> Tuple[ArXivMetadata, bool]:
-            arxiv_url = paper.get("url", "")
-            if not arxiv_url:
-                return paper, False
+        enriched_batch = []
+        failed_batch = []
 
-            s2_data, is_retryable = await self._fetch_paper_data(session, arxiv_url)
-            if s2_data:
-                paper["influential_citations"] = s2_data.get("influentialCitationCount")
-                paper["references"] = self._parse_references(s2_data.get("references"))
+        valid_papers = []
+        arxiv_urls = []
 
-            return paper, is_retryable
+        for paper in batch:
+            url = paper.get("url")
+            if url:
+                valid_papers.append(paper)
+                arxiv_urls.append(url)
+            else:
+                enriched_batch.append(paper)
 
-        # NOTE: We are restricted to 1 request per second, hence concurrency of 1 & delay of 3 seconds between batches.
-        # But we implement concurrency and delay to make it flexible for future use.
-        semaphore = asyncio.Semaphore(config.CONCURRENCY)
+        if arxiv_urls:
+            s2_batch_data, is_retryable = await self._fetch_batch_data(session, arxiv_urls)
 
-        async def bound_process(paper: ArXivMetadata) -> Tuple[ArXivMetadata, bool]:
-            async with semaphore:
-                await asyncio.sleep(config.RETRY_DELAY)  # Ensure we respect the delay between requests.
-                return await process_paper(paper)
-
-        tasks = [bound_process(paper) for paper in batch]
-        results = await asyncio.gather(*tasks)
-
-        enriched_batch = [paper for paper, is_retryable in results if not is_retryable]
-        failed_batch = [paper for paper, is_retryable in results if is_retryable]
+            if is_retryable:
+                failed_batch.extend(valid_papers)
+            elif s2_batch_data is not None:
+                for idx, paper in enumerate(valid_papers):
+                    s2_data = s2_batch_data[idx] if idx < len(s2_batch_data) else None
+                    if s2_data:
+                        paper["influential_citations"] = s2_data.get("influentialCitationCount")
+                        references = s2_data.get("references")
+                        if references:
+                            paper["references"] = self._parse_references(references)
+                    enriched_batch.append(paper)
+            else:
+                enriched_batch.extend(valid_papers)
 
         logger.debug("enrich_batch - END")
         wandb.log({"status": "enrich_batch - END"})
@@ -151,7 +161,8 @@ class SemanticScholar:
 
     async def enrich_dataset(self, dataset_path: str, out_path: str) -> None:
         """
-        Stream `dataset_path` (JSONL), enrich in batches and write results to `out_path`.
+        Stream `dataset_path` (JSONL), enrich in batches and write results to `out_path`
+        using a Producer-Consumer pipeline to decouple I/O and network requests.
         Failed papers will be logged as errors.
 
         Args:
@@ -169,33 +180,53 @@ class SemanticScholar:
         logger.debug("Using concurrency level: %s", config.CONCURRENCY)
         wandb.log({"status": f"enrich_batch - Using concurrency level: {config.CONCURRENCY}"})
         async with aiohttp.ClientSession() as session:
-            with tqdm(desc="Enriching Papers") as pbar:
-                batch: List[ArXivMetadata] = []
-                async for paper in stream_jsonl(dataset_path):
-                    batch.append(paper)
+            # We use an asyncio queue to hold batches of papers to fetch.
+            fetch_queue: asyncio.Queue = asyncio.Queue()
 
-                    if len(batch) >= config.BATCH_SIZE:
+            with tqdm(desc="Enriching Papers") as pbar:
+
+                async def worker():
+                    while True:
+                        batch = await fetch_queue.get()
+                        if batch is None:
+                            fetch_queue.task_done()
+                            break
+
                         enriched, failed = await self.enrich_batch(session, batch)
                         await write_jsonl_batch(out_path, enriched, append=True)
                         for failed_paper in failed:
                             logger.error(
                                 "enrich_dataset - Failed to enrich paper with URL: %s", failed_paper.get("url", "N/A")
                             )
+                            wandb.log({"error": f"Failed to enrich paper with URL: {failed_paper.get('url', 'N/A')}"})
 
                         pbar.update(len(batch))
+                        fetch_queue.task_done()
+
+                # Start the workers. They will run until they receive a `None` batch, which signals them to exit.
+                # We use config.CONCURRENCY to control how many concurrent workers we have making API requests.
+                workers = [asyncio.create_task(worker()) for _ in range(config.CONCURRENCY)]
+
+                # Producer: Read JSONL and put batches into the queue.
+                batch: List[ArXivMetadata] = []
+                async for paper in stream_jsonl(dataset_path):
+                    batch.append(paper)
+
+                    if len(batch) >= config.BATCH_SIZE:
+                        await fetch_queue.put(batch)
                         batch = []
-                        if config.DELAY_BETWEEN_BATCHES:
-                            await asyncio.sleep(config.DELAY_BETWEEN_BATCHES)
 
                 # Final partial batch.
                 if batch:
-                    enriched, failed = await self.enrich_batch(session, batch)
-                    await write_jsonl_batch(out_path, enriched, append=True)
-                    for failed_paper in failed:
-                        logger.error(
-                            "enrich_dataset - Failed to enrich paper with URL: %s", failed_paper.get("url", "N/A")
-                        )
-                    pbar.update(len(batch))
+                    await fetch_queue.put(batch)
+
+                # Signal the workers to exit.
+                for _ in range(config.CONCURRENCY):
+                    await fetch_queue.put(None)
+
+                # Wait for all tasks to be processed.
+                await fetch_queue.join()
+                await asyncio.gather(*workers)
 
         logger.debug("enrich_dataset - END")
         wandb.log({"status": "enrich_dataset - END"})
