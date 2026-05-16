@@ -120,7 +120,7 @@ A minimal Python image (`python3.14-alpine`) is defined directly via the templat
 
 ## Cluster Usage
 
-### Scarpe
+### Scrape
 
 Build the ArXivFlow Crucible Docker image using the Moon template flow:
 
@@ -158,6 +158,14 @@ kubectl delete -f k8s/scrape-arxiv-api.yml
 
 ```bash
 kubectl delete -f k8s/scrape-s2-api.yml
+```
+
+### Upload cleaned dataset to PVC
+
+Upload the pre-annotation data quality check cleaning _(Available in the Streamlit app. See tasks:data-quality-check)_
+
+```bash
+kubectl cp ./data/raw_dataset_enriched_cleaned.jsonl arxivflow-pvc-inspector:/data/arxivflow/data/
 ```
 
 ### Annotate
