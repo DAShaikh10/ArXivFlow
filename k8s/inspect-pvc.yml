@@ -7,6 +7,13 @@ spec:
     - name: arxivflow-pvc-inspector-container
       image: busybox
       command: ["sh", "-c", "sleep infinity"]
+      resources:
+        requests:
+          cpu: "1"
+          memory: "2Gi"
+        limits:
+          cpu: "2"
+          memory: "4Gi"
       volumeMounts:
         - name: arxivflow-pvc
           mountPath: /data
