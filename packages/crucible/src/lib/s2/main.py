@@ -22,7 +22,7 @@ async def main() -> None:
     # Initialize WandB and log configuration.
     wandb.init(
         project=config.WANDB_PROJECT_NAME,
-        job_type="scrape_s2_api",
+        name="scrape_s2_api",
         config={
             "BASE_URL": config.API_BASE_URL,
             "BATCH_SIZE": config.BATCH_SIZE,
@@ -30,6 +30,7 @@ async def main() -> None:
             "MAX_RETRIES": config.MAX_RETRIES,
             "RETRY_DELAY": config.RETRY_DELAY,
         },
+        job_type="scrape",
     )
 
     current_dir = os.path.dirname(__file__)

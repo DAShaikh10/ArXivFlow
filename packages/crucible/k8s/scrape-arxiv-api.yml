@@ -17,7 +17,7 @@ spec:
                 name: crucible-env
           volumeMounts:
             - name: arxivflow-pvc
-              mountPath: /app/data # Mount the persistent volume claim to the container in the path /data.
+              mountPath: /app/data # Mount the persistent volume claim to the container in the path /app/data.
               subPath: arxivflow/data
             - name: arxivflow-pvc
               mountPath: /app/src/logs

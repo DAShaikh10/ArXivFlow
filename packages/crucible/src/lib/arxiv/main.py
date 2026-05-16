@@ -15,7 +15,7 @@ if __name__ == "__main__":
     # Initialize WandB and log configuration.
     wandb.init(
         project=config.WANDB_PROJECT_NAME,
-        job_type="scrape_arxiv_api",
+        name="scrape_arxiv_api",
         config={
             "BASE_URL": config.API_BASE_URL,
             "BATCH_SIZE": config.BATCH_SIZE,
@@ -27,6 +27,7 @@ if __name__ == "__main__":
             "START_DATE": config.START_DATE,
             "TOTAL_RESULTS": config.TOTAL_RESULTS,
         },
+        job_type="scrape",
     )
 
     client = ArXiv()
