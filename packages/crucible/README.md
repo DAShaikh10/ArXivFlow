@@ -1,8 +1,7 @@
 # Crucible Package
 
 Scrape research papers from [ArXiv API][arxiv-api-url] and enrich their metadata using [Semantic Scholar API][semantic-scholar-api-url].
-Perform quality check inspections both pre _(raw data)_ and post annotation.
-Annotate data using **Kubernetes** deployment of Label-Studio.
+Perform raw data quality check inspections.
 
 ---
 
@@ -166,20 +165,6 @@ Upload the pre-annotation data quality check cleaning _(Available in the Streaml
 
 ```bash
 kubectl cp ./data/raw_dataset_enriched_cleaned.jsonl arxivflow-pvc-inspector:/data/arxivflow/data/
-```
-
-### Annotate
-
-Deploy the Label Studio instance connected to the `arxivflow-pvc`, ready for data annotation work package.
-
-```bash
-kubectl apply -f k8s/label-studio.yml
-```
-
-Port fowarding to access the deployed instance locally.
-
-```bash
-kubectl port-forward svc/label-studio 8080:8080
 ```
 
 ---

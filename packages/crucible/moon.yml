@@ -3,13 +3,12 @@ language: python
 
 project:
   name: crucible
-  description: Research paper scraper, quality checks, and annotation package.
+  description: Research paper scraper and raw data quality check package.
   maintainers: ["@DAShaikh10"]
 
 stack: "data"
 tags:
   - arxiv
-  - data-annotation
   - data-scraping
   - data-quality
   - python
@@ -40,7 +39,7 @@ tasks:
       - scripts/clean.sh
     description: Clean virtualenvs, Python cache, and uv lockfiles.
 
-  data-quality-check:
+  quality:
     command: uv run -m streamlit run src/lib/quality/pre_main.py
     description: Open the pre-annotation Quality Check Streamlit dashboard.
 

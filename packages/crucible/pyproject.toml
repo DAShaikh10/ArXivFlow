@@ -1,7 +1,7 @@
 [project]
 name = "crucible"
 version = "1.0.0"
-description = "Research paper scraper package"
+description = "Research paper scraper and raw data quality check package"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
