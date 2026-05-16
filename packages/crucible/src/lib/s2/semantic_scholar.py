@@ -14,6 +14,8 @@ import aiohttp
 from tenacity import RetryCallState, retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from tqdm.asyncio import tqdm
 
+import wandb
+
 from src.lib.arxiv.schema import ArXivMetadata, Reference
 from src.utils import logger, stream_jsonl, write_jsonl_batch
 
@@ -59,13 +61,19 @@ class SemanticScholar:
 
         url = f"{config.API_BASE_URL}/url:{arxiv_url}?fields={config.API_FIELDS}"
 
-        async with session.get(url, headers=self.headers) as response:
-            if response.status == HTTPStatus.NOT_FOUND:
-                logger.warning("_fetch_paper_data - Paper %s not found on Semantic Scholar.", arxiv_url)
-                return None, False
+        try:
+            async with session.get(url, headers=self.headers) as response:
+                if response.status == HTTPStatus.NOT_FOUND:
+                    logger.warning("_fetch_paper_data - Paper %s not found on Semantic Scholar.", arxiv_url)
+                    wandb.log({"warning": f"Paper {arxiv_url} not found on Semantic Scholar."})
+                    return None, False
 
-            response.raise_for_status()
-            return await response.json(), False
+                response.raise_for_status()
+                return await response.json(), False
+        except (aiohttp.ClientError, asyncio.TimeoutError) as exception:
+            logger.error("_fetch_paper_data - Request failed: %s. Retrying...", exception)
+            wandb.log({"status": f"_fetch_paper_data - Request failed: {exception}. Retrying..."})
+            raise
 
     def _parse_references(self, s2_references: list) -> List[Reference]:
         """
@@ -97,10 +105,17 @@ class SemanticScholar:
         """
         Enrich a batch of ArXiv metadata entries using the provided aiohttp session.
 
-        Returns a tuple of (enriched_batch, retryable_failed_batch).
+        Args:
+            session (aiohttp.ClientSession): The aiohttp session for making requests.
+            batch (List[ArXivMetadata]): A list of ArXiv metadata entries to enrich.
+
+        Returns:
+            Tuple[List[ArXivMetadata], List[ArXivMetadata]]: A tuple containing a list of enriched metadata entries
+                                                            and a list of entries that failed enrichment.
         """
 
         logger.debug("enrich_batch - START")
+        wandb.log({"status": "enrich_batch - START"})
 
         async def process_paper(paper: ArXivMetadata) -> Tuple[ArXivMetadata, bool]:
             arxiv_url = paper.get("url", "")
@@ -120,6 +135,7 @@ class SemanticScholar:
 
         async def bound_process(paper: ArXivMetadata) -> Tuple[ArXivMetadata, bool]:
             async with semaphore:
+                await asyncio.sleep(config.RETRY_DELAY)  # Ensure we respect the delay between requests.
                 return await process_paper(paper)
 
         tasks = [bound_process(paper) for paper in batch]
@@ -129,6 +145,7 @@ class SemanticScholar:
         failed_batch = [paper for paper, is_retryable in results if is_retryable]
 
         logger.debug("enrich_batch - END")
+        wandb.log({"status": "enrich_batch - END"})
 
         return enriched_batch, failed_batch
 
@@ -143,11 +160,14 @@ class SemanticScholar:
         """
 
         logger.debug("enrich_dataset - START")
+        wandb.log({"status": "enrich_dataset - START"})
 
         # Clear out existing output files if they exist (to overwrite rather than append)
         if os.path.exists(out_path):
             os.remove(out_path)
 
+        logger.debug("Using concurrency level: %s", config.CONCURRENCY)
+        wandb.log({"status": f"enrich_batch - Using concurrency level: {config.CONCURRENCY}"})
         async with aiohttp.ClientSession() as session:
             with tqdm(desc="Enriching Papers") as pbar:
                 batch: List[ArXivMetadata] = []
@@ -178,3 +198,4 @@ class SemanticScholar:
                     pbar.update(len(batch))
 
         logger.debug("enrich_dataset - END")
+        wandb.log({"status": "enrich_dataset - END"})
