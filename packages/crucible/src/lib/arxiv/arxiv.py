@@ -10,6 +10,7 @@ import xml.etree.ElementTree as ET
 
 import aiofiles
 import aiohttp
+from aiolimiter import AsyncLimiter
 from tenacity import RetryCallState, retry, retry_if_exception_type, stop_after_attempt, wait_fixed
 from tqdm.asyncio import tqdm
 
@@ -26,6 +27,10 @@ class ArXiv:
     ArXiv API client for fetching research paper metadata based on specified `category` and `date range` filters.
     Includes internal methods for parsing XML responses and saving results to a JSONL file.
     """
+
+    def __init__(self) -> None:
+        # ArXiv API is strictly limited to 1 request per config.RETRY_DELAY seconds (typically 3s).
+        self.rate_limiter = AsyncLimiter(max_rate=config.CONCURRENCY, time_period=config.RETRY_DELAY)
 
     @staticmethod
     def _return_empty_list(retry_state: RetryCallState) -> list[ArXivMetadata]:
@@ -198,11 +203,12 @@ class ArXiv:
         wandb.log({"status": "fetch_metadata - START"})
 
         try:
-            async with session.get(url) as response:
-                response.raise_for_status()
-                text = await response.text()
+            async with self.rate_limiter:
+                async with session.get(url) as response:
+                    response.raise_for_status()
+                    text = await response.text()
 
-                return self._parse_metadata_response(text)
+                    return self._parse_metadata_response(text)
         except (aiohttp.ClientError, asyncio.TimeoutError) as exception:
             logger.error("fetch_metadata - Request failed: %s. Retrying...", exception)
             wandb.log({"status": f"fetch_metadata - Request failed: {exception}. Retrying..."})
@@ -210,32 +216,6 @@ class ArXiv:
         finally:
             logger.debug("fetch_metadata - END")
             wandb.log({"status": "fetch_metadata - END"})
-
-    async def _save_data(self, data: list[ArXivMetadata]) -> None:
-        """
-        Save the fetched metadata to a JSONL file.
-
-        Args:
-            data (list[ArXivMetadata]): The list of metadata dictionaries to save.
-
-        Raises:
-            OSError: If there is an error creating directories or writing to the file.
-        """
-
-        current_dir = os.path.dirname(__file__)
-        dataset_path = resolve_path(current_dir, config.RAW_DATASET_FILE)
-
-        async with aiofiles.open(dataset_path, "w", encoding="utf-8") as f:
-            for item in data:
-                await f.write(json.dumps(item) + "\n")
-
-        # Save output dataset as a WandB Artifact.
-        artifact = wandb.Artifact("arxiv_raw_dataset", type="dataset")
-        artifact.add_file(dataset_path)
-        wandb.log_artifact(artifact)
-
-        logger.info("Successfully saved %s records to %s", len(data), dataset_path)
-        wandb.log({"status": f"Successfully saved {len(data)} records to {dataset_path}"})
 
     async def bulk_fetch_metadata(self) -> None:
         """
@@ -269,23 +249,37 @@ class ArXiv:
 
                 url = self._add_date_range_filter(url)
 
-            semaphore = asyncio.Semaphore(config.CONCURRENCY)
-            logger.debug("Using concurrency level: %s", config.CONCURRENCY)
-            wandb.log({"status": f"bulk_fetch - Using concurrency level: {config.CONCURRENCY}"})
+            current_dir = os.path.dirname(__file__)
+            dataset_path = resolve_path(current_dir, config.RAW_DATASET_FILE)
+            total_records = 0
 
-            async def fetch_with_semaphore(session: aiohttp.ClientSession, fetch_url: str) -> list[ArXivMetadata]:
-                async with semaphore:
-                    await asyncio.sleep(config.RETRY_DELAY)  # Delay between requests to respect API rate limits.
-                    return await self.fetch_metadata(session, fetch_url)
-
-            tasks = []
-            # https://export.arxiv.org/api/query?search_query=au:del_maestro+AND+submittedDate:[201501010600+TO+202512310600]&start=0&max_results=10
+            # https://export.arxiv.org/api/query?search_query=au:del_maestro+AND+submittedDate:[...
             async with aiohttp.ClientSession() as session:
+                tasks = []
                 for idx in range(0, config.TOTAL_RESULTS, config.BATCH_SIZE):  # ArXiv API is 0-indexed.
-                    tasks.append(fetch_with_semaphore(session, url + f"&start={idx}&max_results={config.BATCH_SIZE}"))
+                    tasks.append(
+                        asyncio.create_task(
+                            self.fetch_metadata(session, url + f"&start={idx}&max_results={config.BATCH_SIZE}")
+                        )
+                    )
 
-                data = await tqdm.gather(*tasks, desc="Fetching ArXiv Metadata")
-                await self._save_data([item for sublist in data for item in sublist])
+                async with aiofiles.open(dataset_path, "w", encoding="utf-8") as f:
+                    with tqdm(total=len(tasks), desc="Fetching ArXiv Metadata") as pbar:
+                        for coro in asyncio.as_completed(tasks):
+                            data = await coro
+                            for item in data:
+                                await f.write(json.dumps(item) + "\n")
+                            total_records += len(data)
+                            pbar.update(1)
+
+            # Save output dataset as a WandB Artifact.
+            artifact = wandb.Artifact("arxiv_raw_dataset", type="dataset")
+            artifact.add_file(dataset_path)
+            wandb.log_artifact(artifact)
+
+            logger.info("Successfully saved %s records to %s", total_records, dataset_path)
+            wandb.log({"status": f"Successfully saved {total_records} records to {dataset_path}"})
+
         except (ValueError, OSError) as exception:
             logger.error("bulk_fetch_metadata - Failed with exception: %s", exception)
             wandb.log({"status": f"bulk_fetch - Failed with exception: {exception}"})
