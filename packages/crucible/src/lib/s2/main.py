@@ -6,8 +6,6 @@
 
 import asyncio
 import os
-import timeit
-
 import wandb
 
 from src.utils import logger, resolve_path
@@ -34,8 +32,6 @@ async def main() -> None:
         },
     )
 
-    start_time = timeit.default_timer()
-
     current_dir = os.path.dirname(__file__)
     dataset_path = resolve_path(current_dir, config.RAW_DATASET_FILE)
 
@@ -53,11 +49,6 @@ async def main() -> None:
         out_path,
     )
 
-    end_time = timeit.default_timer()
-
-    logger.debug("Execution time: %s seconds", end_time - start_time)
-
-    wandb.log({"execution_time_seconds": end_time - start_time})
     wandb.finish()
 
 

@@ -6,11 +6,7 @@
 """
 
 import asyncio
-import timeit
-
 import wandb
-
-from src.utils.logger import logger
 
 from . import config
 from .arxiv import ArXiv
@@ -35,11 +31,6 @@ if __name__ == "__main__":
 
     client = ArXiv()
 
-    start_time = timeit.default_timer()
     asyncio.run(client.bulk_fetch_metadata())
-    end_time = timeit.default_timer()
 
-    logger.debug("Execution time: %s seconds", end_time - start_time)
-
-    wandb.log({"execution_time_seconds": end_time - start_time})
     wandb.finish()
