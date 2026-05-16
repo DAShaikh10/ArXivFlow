@@ -71,6 +71,44 @@ class SemanticScholar:
             wandb.log({"status": f"_fetch_batch_data - Request failed: {exception}. Retrying..."})
             raise
 
+    @staticmethod
+    def _return_failed_single(retry_state: RetryCallState) -> Optional[dict]:
+        """
+        Fallback if all Tenacity retries fail for single fetch.
+        """
+
+        logger.error("_fetch_single_data - Exhausted all retries. Last error: %s", retry_state.outcome.exception())
+
+    @retry(
+        stop=stop_after_attempt(config.MAX_RETRIES),
+        wait=wait_fixed(config.RETRY_DELAY),
+        retry=retry_if_exception_type((aiohttp.ClientError, asyncio.TimeoutError)),
+        retry_error_callback=_return_failed_single,
+    )
+    async def _fetch_single_data(self, session: aiohttp.ClientSession, arxiv_url: str) -> Optional[dict]:
+        """
+        Fetch metadata for a single paper by ArXiv URL from Semantic Scholar API.
+
+        Args:
+            session (aiohttp.ClientSession): The aiohttp session for making requests.
+            arxiv_url (str): The ArXiv URL of the paper to fetch.
+
+        Returns:
+            Optional[dict]: Paper metadata if successful.
+        """
+
+        url = f"{config.API_BASE_URL}/URL:{arxiv_url}?fields={config.API_FIELDS}"
+
+        try:
+            async with self.rate_limiter:
+                async with session.get(url, headers=self.headers) as response:
+                    response.raise_for_status()
+                    return await response.json()
+        except (aiohttp.ClientError, asyncio.TimeoutError) as exception:
+            logger.error("_fetch_single_data - Request failed: %s. Retrying...", exception)
+            wandb.log({"status": f"_fetch_single_data - Request failed: {exception}. Retrying..."})
+            raise
+
     def _parse_references(self, s2_references: list) -> List[Reference]:
         """
         Parse Semantic Scholar references into our schema.
@@ -132,6 +170,26 @@ class SemanticScholar:
             if s2_batch_data is not None:
                 for idx, paper in enumerate(valid_papers):
                     s2_data = s2_batch_data[idx] if idx < len(s2_batch_data) else None
+
+                    # Fallback logic for when references aren't returned by batch api.
+                    # It is noticed that the batch API does not return references for some research papers and hence we
+                    # Add fallback logic to fetch data for such papers individually to get the references.
+                    refs = s2_data.get("references") if s2_data else None
+                    if s2_data is not None and (refs is None or len(refs) == 0):
+                        logger.warning(
+                            "enrich_batch - Batch API did not return references for URL: %s. Fetching individually...",
+                            arxiv_urls[idx],
+                        )
+                        wandb.log(
+                            {
+                                "status": "enrich_batch - Batch API did not return references for "
+                                + f"URL: {arxiv_urls[idx]}.  Fetching individually..."
+                            }
+                        )
+                        single_data = await self._fetch_single_data(session, arxiv_urls[idx])
+                        if single_data:
+                            s2_data = single_data
+
                     if s2_data:
                         paper["influential_citations"] = s2_data.get("influentialCitationCount")
                         references = s2_data.get("references")
@@ -189,16 +247,25 @@ class SemanticScholar:
                             fetch_queue.task_done()
                             break
 
-                        enriched, failed = await self.enrich_batch(session, batch)
-                        await write_jsonl_batch(out_path, enriched, append=True)
-                        for failed_paper in failed:
-                            logger.error(
-                                "enrich_dataset - Failed to enrich paper with URL: %s", failed_paper.get("url", "N/A")
-                            )
-                            wandb.log({"error": f"Failed to enrich paper with URL: {failed_paper.get('url', 'N/A')}"})
+                        try:
+                            enriched, failed = await self.enrich_batch(session, batch)
+                            await write_jsonl_batch(out_path, enriched, append=True)
+                            for failed_paper in failed:
+                                logger.error(
+                                    "enrich_dataset - Failed to enrich paper with URL: %s",
+                                    failed_paper.get("url", "N/A"),
+                                )
+                                wandb.log(
+                                    {"error": f"Failed to enrich paper with URL: {failed_paper.get('url', 'N/A')}"}
+                                )
 
-                        pbar.update(len(batch))
-                        fetch_queue.task_done()
+                            pbar.update(len(batch))
+                        # pylint: disable=broad-except
+                        except Exception as e:
+                            logger.error("worker - Unhandled exception processing batch: %s", e, exc_info=True)
+                        # pylint: enable=broad-except
+                        finally:
+                            fetch_queue.task_done()
 
                 # Start the workers. They will run until they receive a `None` batch, which signals them to exit.
                 # We use config.CONCURRENCY to control how many concurrent workers we have making API requests.
@@ -224,6 +291,13 @@ class SemanticScholar:
                 # Wait for all tasks to be processed.
                 await fetch_queue.join()
                 await asyncio.gather(*workers)
+
+        artifact = wandb.Artifact(name="enriched_dataset", type="dataset")
+        artifact.add_file(out_path)
+        wandb.log_artifact(artifact)
+
+        logger.debug("Logged enriched dataset as wandb artifact: %s", out_path)
+        wandb.log({"status": f"Logged artifact: {out_path}"})
 
         logger.debug("enrich_dataset - END")
         wandb.log({"status": "enrich_dataset - END"})
