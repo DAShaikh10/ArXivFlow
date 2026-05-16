@@ -7,7 +7,6 @@
 
 import asyncio
 import os
-from http import HTTPStatus
 from typing import List, Optional, Tuple
 
 import aiohttp
@@ -34,13 +33,12 @@ class SemanticScholar:
         self.rate_limiter = AsyncLimiter(max_rate=config.CONCURRENCY, time_period=config.DELAY_BETWEEN_BATCHES)
 
     @staticmethod
-    def _return_failed_batch(retry_state: RetryCallState) -> Tuple[Optional[list], bool]:
+    def _return_failed_batch(retry_state: RetryCallState) -> Optional[list]:
         """
         Fallback if all Tenacity retries fail.
         """
 
         logger.error("_fetch_batch_data - Exhausted all retries. Last error: %s", retry_state.outcome.exception())
-        return None, True
 
     @retry(
         stop=stop_after_attempt(config.MAX_RETRIES),
@@ -48,9 +46,7 @@ class SemanticScholar:
         retry=retry_if_exception_type((aiohttp.ClientError, asyncio.TimeoutError)),
         retry_error_callback=_return_failed_batch,
     )
-    async def _fetch_batch_data(
-        self, session: aiohttp.ClientSession, arxiv_urls: List[str]
-    ) -> Tuple[Optional[list], bool]:
+    async def _fetch_batch_data(self, session: aiohttp.ClientSession, arxiv_urls: List[str]) -> Optional[list]:
         """
         Fetch metadata for a batch of papers by ArXiv URLs from Semantic Scholar API.
 
@@ -59,8 +55,7 @@ class SemanticScholar:
             arxiv_urls (List[str]): A list of ArXiv URLs of the papers to fetch.
 
         Returns:
-            Tuple[Optional[list], bool]: A tuple containing the list of paper metadata if successful (else None),
-                                         and a boolean indicating if it is a retryable failure.
+            Optional[list]: List of paper metadata if successful.
         """
 
         url = f"{config.API_BASE_URL}/batch?fields={config.API_FIELDS}"
@@ -69,13 +64,8 @@ class SemanticScholar:
         try:
             async with self.rate_limiter:
                 async with session.post(url, json=payload, headers=self.headers) as response:
-                    if response.status == HTTPStatus.NOT_FOUND:
-                        logger.warning("_fetch_batch_data - Some papers not found on Semantic Scholar.")
-                        wandb.log({"warning": "Some papers not found on Semantic Scholar."})
-                        return None, False
-
                     response.raise_for_status()
-                    return await response.json(), False
+                    return await response.json()
         except (aiohttp.ClientError, asyncio.TimeoutError) as exception:
             logger.error("_fetch_batch_data - Request failed: %s. Retrying...", exception)
             wandb.log({"status": f"_fetch_batch_data - Request failed: {exception}. Retrying..."})
@@ -138,11 +128,8 @@ class SemanticScholar:
                 enriched_batch.append(paper)
 
         if arxiv_urls:
-            s2_batch_data, is_retryable = await self._fetch_batch_data(session, arxiv_urls)
-
-            if is_retryable:
-                failed_batch.extend(valid_papers)
-            elif s2_batch_data is not None:
+            s2_batch_data = await self._fetch_batch_data(session, arxiv_urls)
+            if s2_batch_data is not None:
                 for idx, paper in enumerate(valid_papers):
                     s2_data = s2_batch_data[idx] if idx < len(s2_batch_data) else None
                     if s2_data:
@@ -153,6 +140,16 @@ class SemanticScholar:
                     enriched_batch.append(paper)
             else:
                 enriched_batch.extend(valid_papers)
+
+        logger.debug(
+            "enrich_batch - Input: %s | Enriched: %s | Failed: %s", len(batch), len(enriched_batch), len(failed_batch)
+        )
+        wandb.log(
+            {
+                "status": f"enrich_batch - Input: {len(batch)} | Enriched: {len(enriched_batch)} | "
+                + f"Failed: {len(failed_batch)}"
+            }
+        )
 
         logger.debug("enrich_batch - END")
         wandb.log({"status": "enrich_batch - END"})
