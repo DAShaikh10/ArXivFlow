@@ -4,6 +4,7 @@
 projects:
   annotate: "packages/annotate"
   crucible: "packages/crucible"
+  lsml: "packages/lsml"
 
 codeowners:
   globalPaths:
