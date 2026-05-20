@@ -1,6 +1,7 @@
 """
-@Author: DAShaikh10
-@Description: Load configuration for the Semantic Scholar scraper module.
+Load configuration for the Semantic Scholar scraper module.
+
+`@author`: DAShaikh10
 """
 
 import os

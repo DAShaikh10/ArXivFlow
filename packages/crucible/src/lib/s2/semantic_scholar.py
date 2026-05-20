@@ -1,8 +1,9 @@
 """
-@Author: DAShaikh10
-@Description: Semantic Scholar API client & utility class to enrich ArXiv research paper metadata
-              with influential citation count and references.
-              Ref.: https://www.semanticscholar.org/faq/influential-citations
+Semantic Scholar API client & utility class to enrich ArXiv research paper metadata
+with influential citation count and references.
+Ref.: https://www.semanticscholar.org/faq/influential-citations
+
+`@author`: DAShaikh10
 """
 
 import asyncio

@@ -1,6 +1,7 @@
 """
-@Author: DAShaikh10
-@Description: Load configuration for data quality checks.
+Load configuration for data quality checks.
+
+`@author`: DAShaikh10
 """
 
 import os

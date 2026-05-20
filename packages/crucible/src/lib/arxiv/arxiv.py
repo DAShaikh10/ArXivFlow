@@ -1,6 +1,7 @@
 """
-@Author: DAShaikh10
-@Description: ArXiv API client & utility class to download & save research paper metadata based on specified filters.
+ArXiv API client & utility class to download & save research paper metadata based on specified filters.
+
+`@author`: DAShaikh10
 """
 
 import asyncio

@@ -1,7 +1,8 @@
 """
-@Author: DAShaikh10
-@Description: Main entry point for the Semantic Scholar API scraper. Invoke to fetch "more" metadata for research papers
-              fetched from ArXiv API using Semanic Scholar API.
+Main entry point for the Semantic Scholar API scraper. Invoke to fetch "more" metadata for research papers
+fetched from ArXiv API using Semanic Scholar API.
+
+`@author`: DAShaikh10
 """
 
 import asyncio

@@ -1,6 +1,7 @@
 """
-@Author: DAShaikh10
-@Description: ArXiv API scraper module.
+ArXiv API scraper module.
+
+`@author`: DAShaikh10
 """
 
 from .schema import ArXivMetadata

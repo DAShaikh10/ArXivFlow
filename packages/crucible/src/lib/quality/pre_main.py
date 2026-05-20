@@ -1,7 +1,8 @@
 """
-@Author: DAShaikh10
-@Description: Main entry point for data quality checks for pre-annotation data quality checks stage.
-              This module orchestrates the execution of quality checks and report generation.
+Main entry point for data quality checks for pre-annotation data quality checks stage.
+This module orchestrates the execution of quality checks and report generation.
+
+`@author`: DAShaikh10
 """
 
 import asyncio

@@ -1,4 +1,5 @@
 """
-@Author: DAShaikh10
-@Description: Semantic Scholar (S2) API scraper module.
+Semantic Scholar (S2) API scraper module.
+
+`@author`: DAShaikh10
 """

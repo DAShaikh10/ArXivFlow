@@ -1,7 +1,8 @@
 """
-@Author: DAShaikh10
-@Description: Utility to resolve file paths for dataset storage.
-              Handles both local monorepo and standard Docker environments.
+Utility to resolve file paths for dataset storage.
+Handles both local monorepo and standard Docker environments.
+
+`@author`: DAShaikh10
 """
 
 import os

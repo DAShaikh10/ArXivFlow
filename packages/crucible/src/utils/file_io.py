@@ -1,6 +1,7 @@
 """
-@Author: DAShaikh10
-@Description: Utility functions for robust File I/O operations, specifically handling JSONL.
+Utility functions for robust File I/O operations, specifically handling JSONL.
+
+`@author`: DAShaikh10
 """
 
 import json

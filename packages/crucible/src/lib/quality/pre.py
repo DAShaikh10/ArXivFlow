@@ -1,6 +1,7 @@
 """
-@Author: DAShaikh10
-@Description: Raw dataset quality checks for the enriched dataset.
+Raw dataset quality checks for the enriched dataset.
+
+`@author`: DAShaikh10
 """
 
 import json

@@ -1,6 +1,7 @@
 """
-@Author: DAShaikh10
-@Description: Load configuration for ArXiv scraper module.
+Load configuration for ArXiv scraper module.
+
+`@author`: DAShaikh10
 """
 
 import os

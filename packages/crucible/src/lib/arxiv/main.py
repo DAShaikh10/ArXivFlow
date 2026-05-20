@@ -1,8 +1,9 @@
 """
-@Author: DAShaikh10
-@Description: Main entry point for the ArXiv API scraper.
-              Invoke to fetch metadata for research papers based on specified filters and save results to a JSONL file.
-              Log the process and artifacts to both locally and on Weights & Biases for tracking and visualization.
+Main entry point for the ArXiv API scraper.
+Invoke to fetch metadata for research papers based on specified filters and save results to a JSONL file.
+Log the process and artifacts to both locally and on Weights & Biases for tracking and visualization.
+
+`@author`: DAShaikh10
 """
 
 import asyncio

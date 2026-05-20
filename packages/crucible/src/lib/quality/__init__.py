@@ -1,4 +1,5 @@
 """
-@Author: DAShaikh10
-@Description: Data quality checks module.
+Data quality checks module.
+
+`@author`: DAShaikh10
 """

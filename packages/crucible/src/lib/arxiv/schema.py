@@ -1,6 +1,7 @@
 """
-@Author: DAShaikh10
-@Description: Schema definitions for ArXiv metadata.
+Schema definitions for ArXiv metadata.
+
+`@author`: DAShaikh10
 """
 
 from typing import List, TypedDict

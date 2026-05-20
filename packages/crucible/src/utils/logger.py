@@ -1,6 +1,7 @@
 """
-@Author: DAShaikh10
-@Description: Central logging utility.
+Central logging utility.
+
+`@author`: DAShaikh10
 """
 
 import logging
