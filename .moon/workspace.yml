@@ -2,6 +2,7 @@
 # Accepts a list of globs, a mapping of projects to relative file paths,
 # or both values.
 projects:
+  annotate: "packages/annotate"
   crucible: "packages/crucible"
 
 codeowners:
