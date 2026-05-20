@@ -117,7 +117,9 @@ A minimal Python image (`python3.14-alpine`) is defined directly via the templat
 
 <div align = "center">
 
-<img src = "assets/dockerhub.png" alt = "Crucible Image"/>
+<a href="https://hub.docker.com/r/dashaikh10/arxivflow-crucible" target="_blank" rel="noopener noreferrer">
+    <img src = "assets/dockerhub.png" alt = "Crucible Image"/>
+</a>
 
 </div>
 
@@ -127,13 +129,19 @@ A minimal Python image (`python3.14-alpine`) is defined directly via the templat
 
 ### Scrape
 
+Run this to generate / update `Dockerfile` using `Dockerfile.tera` and package scaffold:
+
+```bash
+moon docker file crucible # Run from ArXivFlow workspace folder.
+```
+
 Build the ArXivFlow Crucible Docker image using the Moon template flow:
 
 ```bash
 moon run crucible:dockerize # Run from ArXivFlow workspace folder.
 ```
 
-Publish the latest arxiv-crucible image to DockerHub:
+Publish the latest arxiv-crucible image to DockerHub _(Running this command will run dockerize command automatically)_:
 
 ```bash
 moon run crucible:publish # Run from ArXivFlow workspace folder.
@@ -172,8 +180,6 @@ Upload the pre-annotation data quality check cleaning _(Available in the Streaml
 ```bash
 kubectl cp ./data/raw_dataset_enriched_cleaned.jsonl arxivflow-pvc-inspector:/data/arxivflow/data/
 ```
-
----
 
 <!-- REFERENCES -->
 
