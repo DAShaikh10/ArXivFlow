@@ -32,17 +32,17 @@ dev = [
 
 [package.metadata]
 requires-dist = [
-    { name = "aiofiles", specifier = ">=25.1.0" },
-    { name = "dotenv", specifier = ">=0.9.9" },
-    { name = "gliner", specifier = ">=0.2.26" },
-    { name = "tqdm", specifier = ">=4.67.3" },
-    { name = "wandb", specifier = ">=0.27.0" },
+    { name = "aiofiles" },
+    { name = "dotenv" },
+    { name = "gliner" },
+    { name = "tqdm" },
+    { name = "wandb" },
 ]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "black", specifier = ">=26.3.1" },
-    { name = "pylint", specifier = ">=4.0.5" },
+    { name = "black" },
+    { name = "pylint" },
     { name = "ruff" },
 ]
 
