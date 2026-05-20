@@ -5,6 +5,10 @@
       "path": "../",
     },
     {
+      "name": "annotate",
+      "path": "../packages/annotate",
+    },
+    {
       "name": "crucible",
       "path": "../packages/crucible",
     },
