@@ -44,8 +44,8 @@ tasks:
     description: Open the pre-annotation Quality Check Streamlit dashboard.
 
   dockerize:
-    command: docker build --platform linux/amd64 -t dashaikh10/arxivflow-crucible:latest -f packages/crucible/Dockerfile --no-cache .
-    description: Build the ArXivFlow Crucible Docker image.
+    command: docker build --platform linux/amd64 -t dashaikh10/arxivflow-crucible:latest -f packages/crucible/Dockerfile .
+    description: Build the ArXivFlow Crucible Docker image. Use with `-- --no-cache` for a fresh build.
     options:
       # Docker command needs to be executed from the workspace per moon's requirements.
       runFromWorkspaceRoot: true
