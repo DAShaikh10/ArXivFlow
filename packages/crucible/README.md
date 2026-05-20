@@ -17,9 +17,9 @@ Perform raw data quality check inspections.
 
 <img src = "assets/metadata.png" alt = "Crucible Project Summary"/>
 
----
-
 </div>
+
+---
 
 - Fetch research metadata from the [ArXiv API][arxiv-api-url] _(with built-in retry logic that respects usage guidelines)_.
 - Enrich scraped research papers with [influential citations count][s2-influential-citation-count-url] and references from the [Semantic Scholar API][semantic-scholar-api-url] _(aka S2 API)_, strictly adhering to its 1 request per second limit with retry fallbacks.
@@ -114,6 +114,12 @@ This package builds optimized, fully containerized production images using multi
 Moon is configured to scaffold our workspace using `.tera` templates (`Dockerfile.tera`). This enables Moon to programmatically construct isolated execution contexts by selectively copying specific configuration files (`pyproject.toml`, `uv.lock`) and scopes (`src/**/*`) prior to dependency resolutions. This significantly accelerates build steps using layer caching and allows pruning extraneous project files.
 
 A minimal Python image (`python3.14-alpine`) is defined directly via the template build stages to prepare dependencies before shedding development packages entirely for an optimal, lightweight Alpine-based runner.
+
+<div align = "center">
+
+<img src = "assets/dockerhub.png" alt = "Crucible Image"/>
+
+</div>
 
 ---
 
