@@ -12,6 +12,10 @@
       "name": "crucible",
       "path": "../packages/crucible",
     },
+    {
+      "name": "lsml",
+      "path": "../packages/lsml",
+    },
   ],
   "settings": {},
 }
