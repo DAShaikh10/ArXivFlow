@@ -1,0 +1,79 @@
+layer: tool
+language: python
+
+project:
+  name: annotate
+  description: Research paper annotation tools.
+  maintainers: ["@DAShaikh10"]
+
+stack: "data"
+tags:
+  - data-annotation
+  - gliner
+  - label-studio
+  - named-entity-recognition
+  - python
+  - uv
+
+dependsOn:
+  - crucible
+
+docker:
+  file:
+    # onnx dependencies fail on alpine hence, slim is the next minimal option.
+    image: python:3.14-slim
+    template: "packages/annotate/Dockerfile.tera"
+  scaffold:
+    configsPhaseGlobs:
+      - "pyproject.toml"
+      - "uv.lock"
+    sourcesPhaseGlobs:
+      - "src/**/*"
+
+tasks:
+  annotate:
+    command: uv run -m src.lib.ner.gliner
+    description: Run the GLINER annotation pipeline on the research papers.
+
+  clean:
+    command: bash
+    args:
+      - scripts/clean.sh
+    description: Clean virtualenvs, Python cache, and uv lockfiles.
+
+  dockerize:
+    command: docker build
+    args:
+      - --platform
+      - linux/amd64
+      - -t
+      - dashaikh10/arxivflow-annotate:latest
+      - -f
+      - packages/annotate/Dockerfile
+      - .
+    description: Build the ArXivFlow Annotate Docker image. Use with `-- --no-cache` for a fresh build.
+    options:
+      # Docker command needs to be executed from the workspace per moon's requirements.
+      runFromWorkspaceRoot: true
+
+  format:
+    command: black .
+    description: Format code using Black.
+
+  format-check:
+    command: black --check .
+    description: Check code formatting using Black.
+
+  lint:
+    command: pylint .
+    description: Lint code using Pylint.
+
+  publish:
+    command: docker push dashaikh10/arxivflow-annotate:latest
+    description: Publish the ArXivFlow Annotate Docker image to DockerHub.
+    deps:
+      - dockerize
+
+  sync:
+    command: uv sync
+    description: Sync (create .venv, install missing dependencies) the project environment (generate / with the lockfile).
