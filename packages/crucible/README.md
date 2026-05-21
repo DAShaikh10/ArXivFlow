@@ -9,6 +9,7 @@ Perform raw data quality check inspections.
 
 ![Moonrepo][moonrepo-shield]
 ![UV][uv-shield]
+![K8S][k8s-shield]
 ![Docker Image Size][arxivflow-scarper-image-shield]
 
 </div>
@@ -185,6 +186,7 @@ kubectl cp ./data/raw_dataset_enriched_cleaned.jsonl arxivflow-pvc-inspector:/da
 
 [arxiv-api-url]: https://info.arxiv.org/help/api/basics.html
 [arxivflow-scarper-image-shield]: https://img.shields.io/docker/image-size/dashaikh10/arxivflow-crucible?style=flat&label=arxivflow-crucible
+[k8s-shield]: https://img.shields.io/badge/Kubernetes-Informational?style=flat&logo=kubernetes&logoColor=326ce5&labelColor=fff&color=326ce5
 [moonrepo-shield]: https://img.shields.io/badge/Moonrepo-Informational?style=flat&logo=moonrepo&labelColor=fff&color=%236f53f3
 [s2-influential-citation-count-url]: https://www.semanticscholar.org/faq/influential-citations
 [semantic-scholar-api-url]: https://www.semanticscholar.org/product/api
