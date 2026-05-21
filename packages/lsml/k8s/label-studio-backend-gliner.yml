@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: lsml-backend-gliner-large-v21
+  labels:
+    app: lsml-backend-gliner-large-v21
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: lsml-backend-gliner-large-v21
+  template:
+    metadata:
+      labels:
+        app: lsml-backend-gliner-large-v21
+    spec:
+      containers:
+        - name: lsml-backend-gliner
+          image: dashaikh10/arxivflow-lsml:latest
+          ports:
+            - containerPort: 9090
+          env:
+            - name: BASIC_AUTH_USER
+              valueFrom:
+                secretKeyRef:
+                  name: lsml-env
+                  key: BASIC_AUTH_USER
+            - name: BASIC_AUTH_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: lsml-env
+                  key: BASIC_AUTH_PASS
+            - name: GLINER_MODEL_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: lsml-env
+                  key: GLINER_MODEL_NAME
+            - name: LOG_LEVEL
+              value: "DEBUG"
+            - name: LABEL_STUDIO_URL
+              valueFrom:
+                secretKeyRef:
+                  name: lsml-env
+                  key: LABEL_STUDIO_URL
+            - name: LABEL_STUDIO_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lsml-env
+                  key: LABEL_STUDIO_API_KEY
+            - name: PORT
+              value: "9090"
+            - name: THRESHOLD
+              valueFrom:
+                secretKeyRef:
+                  name: lsml-env
+                  key: THRESHOLD
+            - name: WANDB_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: lsml-env
+                  key: WANDB_API_KEY
+            - name: WANDB_PROJECT_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: lsml-env
+                  key: WANDB_PROJECT_NAME
+          resources:
+            requests:
+              cpu: "1"
+              memory: "4Gi"
+            limits:
+              cpu: "2"
+              memory: "8Gi"
+              nvidia.com/gpu: "1"
+      nodeSelector:
+        gpu: l4 # NVIDIA L4 Ada Lovelace GDDR6 24 GB VRAM GPU.
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: lsml-backend-gliner
+spec:
+  selector:
+    app: lsml-backend-gliner-large-v21
+  ports:
+    - protocol: TCP
+      port: 9090
+      targetPort: 9090
