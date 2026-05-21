@@ -164,7 +164,7 @@ Run the GLiNER model job on a suitable GPU **_(We use NVIDIA L4 Ada Lovelace GDD
 kubectl apply -f k8s/gliner-ner-extraction.yml
 ```
 
-Cleanup resources _(pod, job)_ after job completion:
+Cleanup resources _(pod, job)_ after task completion:
 
 ```bash
 kubectl delete -f k8s/label-studio.yml
