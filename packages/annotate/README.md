@@ -8,6 +8,8 @@ Annotate the scraped dataset using **Kubernetes** deployment of [Label Studio][l
 
 ![Moonrepo][moonrepo-shield]
 ![UV][uv-shield]
+![K8S][k8s-shield]
+![HF Hub][gliner-hf-shield]
 ![Docker Image Size][arxivflow-annotate-image-shield]
 
 </div>
@@ -192,6 +194,8 @@ kubectl delete -f k8s/gliner-ner-extraction.yml
 [arxivflow-annotate-image-shield]: https://img.shields.io/docker/image-size/dashaikh10/arxivflow-annotate?style=flat&label=arxivflow-annotate
 [gliner]: https://urchade.github.io/GLiNER/
 [gliner-hf-url]: https://huggingface.co/urchade/gliner_large-v2.1
+[gliner-hf-shield]: https://img.shields.io/badge/urchade/gliner__large--v2.1-Informational?style=flat&logo=huggingface&labelColor=fff&color=ffd21e
+[k8s-shield]: https://img.shields.io/badge/Kubernetes-Informational?style=flat&logo=kubernetes&logoColor=326ce5&labelColor=fff&color=326ce5
 [label-studio-url]: https://labelstud.io/
 [moonrepo-shield]: https://img.shields.io/badge/Moonrepo-Informational?style=flat&logo=moonrepo&labelColor=fff&color=%236f53f3
 [uv-shield]: https://img.shields.io/badge/UV-Informational?style=flat&logo=uv&labelColor=fff&color=%23de5fe9
