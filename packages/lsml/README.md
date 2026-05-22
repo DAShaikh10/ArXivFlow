@@ -160,6 +160,54 @@ Use the following URL to connect to the Label Studio ML backend to Label Studio:
 http://label-studio-ml-backend-gliner:9090
 ```
 
+Add the following labelling information to the Label Studio Labelling instructions:
+
+```html
+<h2>Named Entity Recognition (NER) Labeling Task</h2>
+
+<br />
+
+<p>
+  Your task is to identify and label named entities in academic paper abstracts to power a recommendation system.
+</p>
+
+<br />
+
+<h3>Entity Types</h3>
+<ul>
+  <li><strong>nlp task</strong>: The specific task or problem being solved (e.g., "Machine Translation", "Sentiment Analysis")</li>
+  <li><strong>model architecture</strong>: The structural design of the model (e.g., "Transformer", "Convolutional Neural Network")</li>
+  <li><strong>algorithmic method</strong>: A technique or algorithm used in the process (e.g., "contrastive learning", "gradient descent")</li>
+  <li><strong>evaluation dataset</strong>: Datasets or benchmarks used for testing (e.g., "SQuAD", "ImageNet", "WMT14")</li>
+  <li><strong>application domain</strong>: The real-world field where this is applied (e.g., "healthcare", "autonomous driving", "finance")</li>
+</ul>
+
+<br />
+
+<h3>How to Label</h3>
+<ol>
+  <li>Highlight text by clicking and dragging</li>
+  <li>Select the appropriate entity type from the dropdown</li>
+  <li>Review highlighted entities before saving</li>
+</ol>
+
+<br />
+
+<h3>Examples</h3>
+<p><strong>Correct:</strong> "We use a <i>Transformer</i> to improve <i>Named Entity Recognition</i>" → model architecture + nlp task</p>
+<p><strong>Correct:</strong> "Evaluated on the <i>GLUE benchmark</i> for <i>clinical text</i>" → evaluation dataset + application domain</p>
+<p><strong>Avoid:</strong> Labeling general or ambiguous phrases like "our novel model", "the main dataset"</p>
+
+<br />
+
+<h3>Guidelines</h3>
+<ul>
+  <li>Be consistent with capitalization and spacing when highlighting</li>
+  <li>Label exact multi-word entities as one unit (e.g., "Generative Adversarial Network")</li>
+  <li>Only highlight references explicitly present in the abstract text.</li>
+</ul>
+```
+
 <div align = "center">
 
 <img src = "assets/lsml-setup.png" alt = "LSML Setup"/>
