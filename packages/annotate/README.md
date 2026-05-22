@@ -156,6 +156,16 @@ You should then be able to access your Label Studio deployment at `http://localh
 kubectl port-forward svc/label-studio 8080:8080
 ```
 
+Connect to ArXivFlow PVC
+
+<div align = "center">
+
+<img img src = "assets/source.png" alt = "Source Selection Image"/>
+<img img src = "assets/jsonl.png" alt = "File Selection Image"/>
+<img img src = "assets/connect.png" alt = "Review Source Image"/>
+
+</div>
+
 ### NER using GLiNER Large 2.1
 
 Run the GLiNER model job on a suitable GPU **_(We use NVIDIA L4 Ada Lovelace GDDR6 24GB VRAM)_** or CPU with enough RAM _(12 ~ 16 GB should be enough)_
