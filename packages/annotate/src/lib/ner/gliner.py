@@ -171,15 +171,17 @@ if __name__ == "__main__":
         logger.debug("Model loaded successfully")
 
         # GLiNER works best with lower-case or title-case, natural language descriptions.
-        label_mapping = {
-            "model architecture": "ARCH",
-            "evaluation dataset": "DATASET",
-            "algorithmic method": "METHOD",
-            "nlp task": "TASK",
-        }
-
         # Extract only the keys (the descriptive text)
-        labels: List[str] = list(label_mapping.keys())
+        labels: List[str] = [
+            "Application Domain",
+            "Dataset or Benchmark Name",
+            "Evaluation Metric",
+            "Language or Dialect",
+            "Machine Learning Architecture",
+            "Prompting Strategy",
+            "Target NLP Task",
+            "Training or Fine-tuning Method",
+        ]
 
         # Setup Weights & Biases for experiment tracking.
         wandb.init(
@@ -219,7 +221,6 @@ if __name__ == "__main__":
 
                     formatted_entities = []
                     for entity in entities:
-                        strict_tag = label_mapping[entity["label"]]
                         formatted_entities.append(
                             {
                                 "text": entity["text"],
