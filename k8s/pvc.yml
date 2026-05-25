@@ -4,7 +4,8 @@ metadata:
   name: arxivflow-pvc
 spec:
   accessModes:
-    - ReadWriteOnce # Use ReadWriteMany if multiple Pods need to write to the volume.
+    - ReadWriteMany # Use ReadWriteMany if multiple Pods need to write to the volume.
   resources:
     requests:
       storage: 5Gi # We can increase but NOT decrease the storage size later.
+  storageClassName: shared
