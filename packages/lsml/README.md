@@ -168,18 +168,53 @@ Add the following labelling information to the Label Studio Labelling instructio
 <br />
 
 <p>
-  Your task is to identify and label named entities in academic paper abstracts to power a recommendation system.
+  Your task is to identify and label named entities in academic paper abstracts
+  to power a research paper recommendation system.
 </p>
 
 <br />
 
 <h3>Entity Types</h3>
 <ul>
-  <li><strong>nlp task</strong>: The specific task or problem being solved (e.g., "Machine Translation", "Sentiment Analysis")</li>
-  <li><strong>model architecture</strong>: The structural design of the model (e.g., "Transformer", "Convolutional Neural Network")</li>
-  <li><strong>algorithmic method</strong>: A technique or algorithm used in the process (e.g., "contrastive learning", "gradient descent")</li>
-  <li><strong>evaluation dataset</strong>: Datasets or benchmarks used for testing (e.g., "SQuAD", "ImageNet", "WMT14")</li>
-  <li><strong>application domain</strong>: The real-world field where this is applied (e.g., "healthcare", "autonomous driving", "finance")</li>
+  <li>
+    <strong>Target NLP Task</strong>: Specific language problems or objectives
+    being targeted (e.g., "machine translation", "coreference resolution",
+    "abstractive summarization").
+  </li>
+  <li>
+    <strong>Machine Learning Architecture</strong>: Structural frameworks,
+    neural networks, or computational backbones (e.g., "Transformer", "Mamba",
+    "BiLSTM", "Sparse Attention").
+  </li>
+  <li>
+    <strong>Training or Fine-tuning Method</strong>: The learning paradigm,
+    optimization strategy, or adaptation technique used (e.g., "Contrastive
+    Learning", "LoRA", "RLHF", "Parameter-Efficient Fine-Tuning").
+  </li>
+  <li>
+    <strong>Prompting Strategy</strong>: Interaction mechanisms or prompt
+    engineering paradigms used with frozen LLMs (e.g., "Chain-of-Thought",
+    "In-Context Learning", "Tree-of-Thoughts").
+  </li>
+  <li>
+    <strong>Dataset or Benchmark Name</strong>: Concrete named corpora,
+    evaluation suites, or leaderboards (e.g., "SQuAD", "GLUE", "MMLU", "GSM8K").
+  </li>
+  <li>
+    <strong>Application Domain</strong>: The specific industry vertical,
+    specialized text type, or context constraints (e.g., "Biomedical records",
+    "Legal contracts", "Social media tweets").
+  </li>
+  <li>
+    <strong>Evaluation Metric</strong>: Mathematical, automated, or human
+    validation metrics used to measure success (e.g., "ROUGE-L", "BLEU score",
+    "Perplexity", "Human Likert Scale").
+  </li>
+  <li>
+    <strong>Language or Dialect</strong>: The specific languages, variations, or
+    linguistic properties targeted (e.g., "Low-resource languages", "African
+    dialects", "Code-switched Hindi-English", "Multilingual").
+  </li>
 </ul>
 
 <br />
@@ -194,16 +229,30 @@ Add the following labelling information to the Label Studio Labelling instructio
 <br />
 
 <h3>Examples</h3>
-<p><strong>Correct:</strong> "We use a <i>Transformer</i> to improve <i>Named Entity Recognition</i>" → model architecture + nlp task</p>
-<p><strong>Correct:</strong> "Evaluated on the <i>GLUE benchmark</i> for <i>clinical text</i>" → evaluation dataset + application domain</p>
-<p><strong>Avoid:</strong> Labeling general or ambiguous phrases like "our novel model", "the main dataset"</p>
+<p>
+  <strong>Correct:</strong> "We apply <i>LoRA</i> to a
+  <i>Transformer</i> backbone for <i>Named Entity Recognition</i>" → Training or
+  Fine-tuning Method + Machine Learning Architecture + Target NLP Task
+</p>
+<p>
+  <strong>Correct:</strong> "Evaluated using <i>ROUGE-L</i> on the
+  <i>MMLU</i> dataset for <i>legal contracts</i>" → Evaluation Metric + Dataset
+  or Benchmark Name + Application Domain
+</p>
+<p>
+  <strong>Avoid:</strong> Labeling general or ambiguous phrases like "our novel
+  framework", "the proposed model", "standard metrics".
+</p>
 
 <br />
 
 <h3>Guidelines</h3>
 <ul>
   <li>Be consistent with capitalization and spacing when highlighting</li>
-  <li>Label exact multi-word entities as one unit (e.g., "Generative Adversarial Network")</li>
+  <li>
+    Label exact multi-word entities as one single unit (e.g., "Generative
+    Adversarial Network")
+  </li>
   <li>Only highlight references explicitly present in the abstract text.</li>
 </ul>
 ```
