@@ -16,6 +16,10 @@
       "name": "lsml",
       "path": "../packages/lsml",
     },
+    {
+      "name": "papervec",
+      "path": "../packages/papervec",
+    },
   ],
   "settings": {},
 }
