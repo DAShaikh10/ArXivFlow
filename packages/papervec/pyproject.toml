@@ -1,0 +1,41 @@
+[project]
+name = "papervec"
+version = "1.0.0"
+description = "Research paper embedding generator tool"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "adapters",
+    "chromadb",
+    "pandas",
+    "python-dotenv",
+    "torch",
+    "wandb",
+]
+
+[dependency-groups]
+dev = [
+    "black",
+    "pylint",
+    "ruff",
+]
+
+[tool.black]
+line-length = 120
+target-version = ["py314"]
+
+[tool.pylint.main]
+ignore = [
+    ".venv",
+    "__pycache__"
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.ruff]
+line-length = 120
+target-version = "py314" # Keeps Ruff aligned with your project requirements
+
+[tool.ruff.lint]
+extend-select = ["I"] # Adds isort rules (I) to the default set (E, F)
