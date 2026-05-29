@@ -11,17 +11,19 @@ tags:
   - data-annotation
   - gliner
   - label-studio
+  - llm
   - named-entity-recognition
   - python
   - uv
+  - vllm
 
 dependsOn:
   - crucible
 
 docker:
   file:
-    # onnx dependencies fail on alpine hence, slim is the next minimal option.
-    image: python:3.14-slim
+    # k8s Cluster NVIDIA L4 GPU nodes run CUDA 13.0.
+    image: nvidia/cuda:13.0.0-runtime-ubuntu24.04
     template: "packages/annotate/Dockerfile.tera"
   scaffold:
     configsPhaseGlobs:
@@ -29,12 +31,9 @@ docker:
       - "uv.lock"
     sourcesPhaseGlobs:
       - "src/**/*"
+      - "!src/lib/quality/" # Exclude quality module from the image as it's only used for evaluation.
 
 tasks:
-  annotate:
-    command: uv run -m src.lib.ner.gliner
-    description: Run the GLINER annotation pipeline on the research papers.
-
   clean:
     command: bash
     args:
@@ -63,6 +62,14 @@ tasks:
   format-check:
     command: black --check .
     description: Check code formatting using Black.
+
+  gliner:
+    command: uv run -m src.lib.ner.gliner
+    description: Run the GLINER annotation pipeline on the research papers.
+
+  lmner:
+    command: uv run -m src.lib.ner.lmner
+    description: Run the Language Model NER (LMNER) annotation pipeline on the research papers.
 
   lint:
     command: pylint .
