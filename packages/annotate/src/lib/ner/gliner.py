@@ -5,8 +5,8 @@ Perform Named Entity Recognition (NER) on paper abstracts using the GLiNER model
 """
 
 import asyncio
-import os
 import json
+import os
 from typing import List
 
 import aiofiles
@@ -15,7 +15,6 @@ from gliner import GLiNER
 from tqdm import tqdm
 
 import wandb
-
 from src.utils import logger, resolve_path
 
 from . import config
@@ -178,7 +177,6 @@ if __name__ == "__main__":
             "Evaluation Metric",
             "Language or Dialect",
             "Machine Learning Architecture",
-            "Prompting Strategy",
             "Target NLP Task",
             "Training or Fine-tuning Method",
         ]
