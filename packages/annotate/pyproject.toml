@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
     "aiofiles",
+    "codecarbon",
     "dotenv",
     "gliner",
     "tqdm",
@@ -18,6 +19,9 @@ dev = [
     "pylint",
     "ruff"
 ]
+
+[project.optional-dependencies]
+llm = ["vllm"]
 
 [tool.black]
 line-length = 120
