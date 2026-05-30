@@ -69,6 +69,10 @@ tasks:
     command: uv run -m src.lib.ner.gliner
     description: Run the GLINER annotation pipeline on the research papers.
 
+  iaa:
+    command: uv run -m src.lib.quality.iaa
+    description: Run the Inter-Annotator Agreement (IAA) evaluation for the NER annotations.
+
   lmner:
     command: uv run -m src.lib.ner.lmner
     description: Run the Language Model NER (LMNER) annotation pipeline on the research papers.
