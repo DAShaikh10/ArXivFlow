@@ -10,6 +10,7 @@ stack: "data"
 tags:
   - data-annotation
   - gliner
+  - inter-annotator-agreement
   - label-studio
   - llm
   - named-entity-recognition
