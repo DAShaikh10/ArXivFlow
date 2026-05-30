@@ -32,6 +32,7 @@ ignore = [
     ".venv",
     "__pycache__"
 ]
+ignored-modules = ["vllm"]
 
 [tool.pylint.format]
 max-line-length = 120
