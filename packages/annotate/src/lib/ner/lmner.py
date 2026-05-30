@@ -142,12 +142,12 @@ def convert_to_label_studio(abstracts: DataFrame, model_name: str, outputs: List
             }
         )
 
-    output_path = resolve_path(os.path.dirname(__file__), f"{model_name}-annotation.jsonl")
+    output_path = resolve_path(os.path.dirname(__file__), f"{model_name}-annotation.json")
     with open(output_path, "w", encoding="utf-8") as f:
         json.dump(results, f, indent=2)
 
-    # Sibling diagnostic file holding the raw model outputs (e.g. lmner_annotation.raw.jsonl).
-    raw_output_path = f"{os.path.splitext(output_path)[0]}.raw.jsonl"
+    # Sibling diagnostic file holding the raw model outputs (e.g. lmner_annotation.raw.json).
+    raw_output_path = f"{os.path.splitext(output_path)[0]}.raw.json"
     with open(raw_output_path, "w", encoding="utf-8") as f:
         for record in raw_records:
             f.write(json.dumps(record) + "\n")
@@ -318,8 +318,8 @@ def main() -> None:
     )
 
     # Save WandB artifact.
-    output_path = resolve_path(current_dir, f"{model_name}-annotation.jsonl")
-    raw_output_path = f"{os.path.splitext(output_path)[0]}.raw.jsonl"
+    output_path = resolve_path(current_dir, f"{model_name}-annotation.json")
+    raw_output_path = f"{os.path.splitext(output_path)[0]}.raw.json"
     artifact = wandb.Artifact(
         name=f"{model_name}-annotations",
         type="dataset",
