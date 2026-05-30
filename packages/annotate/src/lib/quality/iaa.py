@@ -238,33 +238,43 @@ def report_comparison(reference_label: str, comparison_label: str, reference_dat
 
     reference_vec, comparison_vec, common_ids = align_annotations(reference_data, comparison_data)
 
-    print("\n" + "=" * 60)
-    print(f"NER Inter-Annotator Agreement ({reference_label} vs {comparison_label})")
-    print("=" * 60)
+    logger.info("=" * 60)
+    logger.info("NER Inter-Annotator Agreement (%s vs %s)", reference_label, comparison_label)
+    logger.info("=" * 60)
 
     if not common_ids:
-        print("No matching papers found between the two datasets.")
-        print("=" * 60)
+        logger.info("No matching papers found between the two datasets.")
+        logger.info("=" * 60)
         return
 
     if len(reference_vec) == 0:
-        print("Papers matched, but no entities were found in either dataset.")
-        print("=" * 60)
+        logger.info("Papers matched, but no entities were found in either dataset.")
+        logger.info("=" * 60)
         return
 
     metrics = calculate_metrics(reference_vec, comparison_vec)
 
-    print(f"Papers aligned       : {len(common_ids)}")
-    print(f"Unique entities      : {len(reference_vec)}")
-    print("-" * 60)
-    print(f"Percent Agreement    : {metrics['percent_agreement']:.3f}")
-    print(f"Cohen's Kappa        : {metrics['cohen_kappa']:.3f}")
-    print(f"Krippendorff's Alpha : {metrics['krippendorff_alpha']:.3f}")
-    print("-" * 60)
-    print(f"Precision            : {metrics['precision']:.3f} ({comparison_label} predictions vs {reference_label})")
-    print(f"Recall               : {metrics['recall']:.3f} (Did {comparison_label} find {reference_label} entities?)")
-    print(f"F1-Score             : {metrics['f1']:.3f} (Overall Balance)")
-    print("=" * 60)
+    logger.info("Papers aligned       : %d", len(common_ids))
+    logger.info("Unique entities      : %d", len(reference_vec))
+    logger.info("-" * 60)
+    logger.info("Percent Agreement    : %.3f", metrics["percent_agreement"])
+    logger.info("Cohen's Kappa        : %.3f", metrics["cohen_kappa"])
+    logger.info("Krippendorff's Alpha : %.3f", metrics["krippendorff_alpha"])
+    logger.info("-" * 60)
+    logger.info(
+        "Precision            : %.3f (%s predictions vs %s)",
+        metrics["precision"],
+        comparison_label,
+        reference_label,
+    )
+    logger.info(
+        "Recall               : %.3f (Did %s find %s entities?)",
+        metrics["recall"],
+        comparison_label,
+        reference_label,
+    )
+    logger.info("F1-Score             : %.3f (Overall Balance)", metrics["f1"])
+    logger.info("=" * 60)
 
 
 def main() -> None:
