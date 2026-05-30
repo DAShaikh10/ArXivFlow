@@ -13,11 +13,14 @@ dependencies = [
     "wandb",
 ]
 
+# sckit-learn and krippendorff are only needed for calculating inter-annotator agreement by the quality library.
 [dependency-groups]
 dev = [
     "black",
+    "krippendorff",
     "pylint",
-    "ruff"
+    "ruff",
+    "scikit-learn",
 ]
 
 [project.optional-dependencies]
