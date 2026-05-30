@@ -281,6 +281,9 @@ def _spans_overlap(span_a: dict, span_b: dict) -> bool:
     return a_start < b_end and b_start < a_end
 
 
+# pylint: disable=too-many-locals
+
+
 def calculate_overlap_metrics(reference_data: dict, comparison_data: dict) -> dict:
     """
     Computes relaxed (partial-overlap) Precision/Recall/F1 over the papers shared by both
@@ -343,6 +346,9 @@ def calculate_overlap_metrics(reference_data: dict, comparison_data: dict) -> di
         "fp": false_positives,
         "fn": false_negatives,
     }
+
+
+# pylint: enable=too-many-locals
 
 
 def report_comparison(reference_label: str, comparison_label: str, reference_data: dict, comparison_data: dict) -> None:
