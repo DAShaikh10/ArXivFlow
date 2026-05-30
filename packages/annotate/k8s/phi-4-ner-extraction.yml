@@ -2,19 +2,22 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: qwen25-14b-instruct-ner-extraction
+  name: phi4-ner-extraction
 spec:
   template:
     spec:
       securityContext:
         runAsUser: 0 # Run Docker image as user root.
       containers:
-        - name: lm-ner-extraction
+        - name: lmner-extraction
           image: dashaikh10/arxivflow-annotate:latest
           command: ["python", "-m", "src.lib.ner.lmner"]
           envFrom:
             - secretRef:
                 name: annotate-env
+          env:
+            - name: LM_MODEL_NAME
+              value: microsoft/phi-4
           resources:
             limits:
               nvidia.com/gpu: "2" # 2 x 24 GB GDDR6 VRAM.

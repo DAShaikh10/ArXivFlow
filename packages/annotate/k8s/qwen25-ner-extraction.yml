@@ -1,0 +1,51 @@
+# Jobs are batch processing resources meant to run once or on a schedule.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: qwen25-14b-instruct-ner-extraction
+spec:
+  template:
+    spec:
+      securityContext:
+        runAsUser: 0 # Run Docker image as user root.
+      containers:
+        - name: lmner-extraction
+          image: dashaikh10/arxivflow-annotate:latest
+          imagePullPolicy: Always # Always re-pull :latest so freshly pushed code is never served from a stale node cache.
+          command: ["python", "-m", "src.lib.ner.lmner"]
+          envFrom:
+            - secretRef:
+                name: annotate-env
+          env:
+            - name: LM_MODEL_NAME
+              value: Qwen/Qwen2.5-14B-Instruct
+          resources:
+            limits:
+              nvidia.com/gpu: "2" # 2 x 24 GB GDDR6 VRAM.
+          volumeMounts:
+            - name: arxivflow-pvc
+              mountPath: /app/data # Mount the persistent volume claim to the container in the path /app/data.
+              subPath: arxivflow/data
+            - name: arxivflow-pvc
+              mountPath: /app/src/logs
+              subPath: arxivflow/annotate/logs
+            - name: ssh-key
+              mountPath: /root/.ssh # Mount the secret with the SSH key to the container.
+            - name: dshm
+              mountPath: /dev/shm # Enlarge shared memory for vLLM IPC + NCCL across the 2 L4 GPUs (TP=2).
+      nodeSelector:
+        gpu: l4 # Ada Lovelace 24GB GDDR6 GPU node.
+      restartPolicy: Never
+
+      volumes:
+        - name: arxivflow-pvc
+          persistentVolumeClaim:
+            claimName: arxivflow-pvc
+        - name: ssh-key
+          secret:
+            secretName: ssh-key-secret
+        - name: dshm # RAM-backed shared memory for vLLM tensor-parallel IPC / NCCL SHM transport.
+          emptyDir:
+            medium: Memory
+            sizeLimit: "8Gi"
+  backoffLimit: 2
