@@ -5,8 +5,11 @@
 FROM nvidia/cuda:13.0.0-runtime-ubuntu24.04 AS base
 WORKDIR /app
 
-# Ensure compilation is restricted strictly to NVIDIA L4 (Compute Capability 8.9)
-ENV TORCH_CUDA_ARCH_LIST="8.9"
+# Default to NVIDIA L4 supported CUDA architecture. Adjust as needed for other GPU targets.
+ARG CUDA_ARCH="8.9"
+
+# Ensure compilation is restricted.
+ENV TORCH_CUDA_ARCH_LIST=${CUDA_ARCH}
 ENV DEBIAN_FRONTEND=noninteractive
 
 # Install bash, curl, certificates, and git for the build layer.
