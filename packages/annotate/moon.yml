@@ -45,6 +45,8 @@ tasks:
     args:
       - --platform
       - linux/amd64
+      - --build-arg
+      - CUDA_ARCH="8.9" # Build for NVIDIA L4 GPU architecture (compute capability 8.9).
       - -t
       - dashaikh10/arxivflow-annotate:latest
       - -f
