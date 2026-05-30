@@ -21,7 +21,7 @@ import wandb
 from src.utils import logger, resolve_path
 
 from . import config
-from .schema import ArXivEntities
+from .schema import FIELD_TO_LABEL, ArXivEntities
 
 
 # pylint: disable=too-many-branches, too-many-locals, too-many-statements
@@ -84,8 +84,7 @@ def convert_to_label_studio(abstracts: DataFrame, model_name: str, outputs: List
         result: List[Dict] = []
         seen_spans: set = set()
         for label_name, spans in prediction.items():
-            # Format the label name to be readable (e.g., target_nlp_task -> Target NLP Task)
-            clean_label = label_name.replace("_", " ").title()
+            clean_label = FIELD_TO_LABEL.get(label_name, label_name.replace("_", " ").title())
 
             for span in spans:
                 # Guard against empty/whitespace-only spans: re.escape("") matches at every

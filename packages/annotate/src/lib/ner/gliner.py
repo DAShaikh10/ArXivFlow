@@ -18,7 +18,7 @@ import wandb
 from src.utils import logger, resolve_path
 
 from . import config
-from .schema import Annotation, Paper
+from .schema import NER_LABELS, Annotation, Paper
 
 
 async def read_abstracts(encoding: str = "utf-8") -> List[Paper]:
@@ -169,17 +169,8 @@ if __name__ == "__main__":
         model = GLiNER.from_pretrained(config.GLINER_MODEL).to(device)
         logger.debug("Model loaded successfully")
 
-        # GLiNER works best with lower-case or title-case, natural language descriptions.
-        # Extract only the keys (the descriptive text)
-        labels: List[str] = [
-            "Application Domain",
-            "Dataset or Benchmark Name",
-            "Evaluation Metric",
-            "Language or Dialect",
-            "Machine Learning Architecture",
-            "Target NLP Task",
-            "Training or Fine-tuning Method",
-        ]
+        # GLiNER works best with title-case, natural language descriptions.
+        labels: List[str] = NER_LABELS
 
         # Setup Weights & Biases for experiment tracking.
         wandb.init(

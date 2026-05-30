@@ -4,9 +4,29 @@ Schema definitions for NER module.
 `@author`: DAShaikh10
 """
 
-from typing import List, TypedDict
+from typing import Dict, List, TypedDict
 
 from pydantic import BaseModel, Field
+
+NER_LABELS: List[str] = [
+    "Application Domain",
+    "Dataset or Benchmark Name",
+    "Evaluation Metric",
+    "Language or Dialect",
+    "Machine Learning Architecture",
+    "Target NLP Task",
+    "Training or Fine-tuning Method",
+]
+
+FIELD_TO_LABEL: Dict[str, str] = {
+    "target_nlp_task": "Target NLP Task",
+    "machine_learning_architecture": "Machine Learning Architecture",
+    "training_method": "Training or Fine-tuning Method",
+    "dataset_name": "Dataset or Benchmark Name",
+    "application_domain": "Application Domain",
+    "evaluation_metric": "Evaluation Metric",
+    "language_dialect": "Language or Dialect",
+}
 
 
 class Entity(TypedDict):
