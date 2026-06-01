@@ -53,7 +53,24 @@ tasks:
       - -f
       - packages/annotate/Dockerfile
       - .
-    description: Build the ArXivFlow Annotate Docker image. Use with `-- --no-cache` for a fresh build.
+    description: Build the ArXivFlow Annotate SM-89 Docker image. Use with `-- --no-cache` for a fresh build.
+    options:
+      # Docker command needs to be executed from the workspace per moon's requirements.
+      runFromWorkspaceRoot: true
+
+  dockerize-sm-90:
+    command: docker build
+    args:
+      - --platform
+      - linux/amd64
+      - --build-arg
+      - CUDA_ARCH="9.0" # Build for NVIDIA H1/200 GPU architecture (compute capability 9.0).
+      - -t
+      - dashaikh10/arxivflow-annotate-sm-90:latest
+      - -f
+      - packages/annotate/Dockerfile
+      - .
+    description: Build the ArXivFlow Annotate SM-90 Docker image. Use with `-- --no-cache` for a fresh build.
     options:
       # Docker command needs to be executed from the workspace per moon's requirements.
       runFromWorkspaceRoot: true
@@ -87,6 +104,12 @@ tasks:
     description: Publish the ArXivFlow Annotate Docker image to DockerHub.
     deps:
       - dockerize
+
+  publish-sm-90:
+    command: docker push dashaikh10/arxivflow-annotate-sm-90:latest
+    description: Publish the ArXivFlow Annotate SM-90 Docker image to DockerHub.
+    deps:
+      - dockerize-sm-90
 
   sync:
     command: uv sync
