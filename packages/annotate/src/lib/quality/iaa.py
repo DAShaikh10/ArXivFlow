@@ -25,93 +25,6 @@ from src.utils import logger, resolve_path
 from . import config
 
 
-def load_label_studio_annotations(file_path: str) -> dict:
-    """
-    Parses Label Studio JSON files for NER tasks (human gold annotations).
-
-    Args:
-        file_path (str): Path to the Label Studio annotation JSON file.
-
-    Returns:
-        dict: A dictionary mapping 'arxiv_id' -> list of span dicts (see `_extract_spans`).
-    """
-
-    ls_data = {}
-    file_pattern = Path(file_path)
-
-    for filepath in glob.glob(str(file_pattern)):
-        with open(filepath, "r", encoding="utf-8") as f:
-            file_data = json.load(f)
-
-            # Ensure file_data is iterable. If it loaded a single root object, wrap it.
-            if isinstance(file_data, dict):
-                file_data = [file_data]
-
-            for item in file_data:
-                # If the item itself is a list (nested export), process its internal tasks.
-                tasks_to_process = item if isinstance(item, list) else [item]
-
-                for task in tasks_to_process:
-                    if not isinstance(task, dict):
-                        continue
-
-                    data_block = task.get("data", {})
-                    paper_id = str(data_block.get("arxiv_id", "")).strip()
-
-                    if not paper_id:
-                        continue
-
-                    annotations = task.get("annotations", [])
-                    if not annotations:
-                        continue
-
-                    ls_data[paper_id] = _extract_spans(annotations[0].get("result", []))
-
-    return ls_data
-
-
-def load_lm_predictions(filepath: str) -> dict:
-    """
-    Parses LLM (Phi / Qwen) outputs stored in the Label Studio prediction format.
-
-    The LMNER pipeline serialises its results as a single JSON array (despite the
-    `.jsonl` extension), where each task carries its spans under `predictions[0].result`.
-
-    Args:
-        filepath (str): Path to the LLM annotation file (e.g. `phi-4-annotation.jsonl`).
-
-    Returns:
-        dict: A dictionary mapping 'arxiv_id' -> list of span dicts (see `_extract_spans`).
-    """
-
-    lm_data = {}
-
-    with open(filepath, "r", encoding="utf-8") as f:
-        file_data = json.load(f)
-
-    # Ensure file_data is iterable. If it loaded a single root object, wrap it.
-    if isinstance(file_data, dict):
-        file_data = [file_data]
-
-    for task in file_data:
-        if not isinstance(task, dict):
-            continue
-
-        data_block = task.get("data", {})
-        paper_id = str(data_block.get("arxiv_id", "")).strip()
-
-        if not paper_id:
-            continue
-
-        predictions = task.get("predictions", [])
-        if not predictions:
-            continue
-
-        lm_data[paper_id] = _extract_spans(predictions[0].get("result", []))
-
-    return lm_data
-
-
 def _extract_spans(results: list) -> list:
     """
     Extracts span dicts from a Label Studio `result` list, preserving the character offsets
@@ -164,6 +77,35 @@ def _spans_to_entity_set(spans: list) -> set:
     return {(span["text"], span["label"]) for span in spans}
 
 
+def _spans_overlap(span_a: dict, span_b: dict) -> bool:
+    """
+    Decides whether two spans match under relaxed criteria: identical label AND intersecting
+    character ranges. This credits boundary disagreements such as "WikiText-2 dataset" vs
+    "WikiText-2" or "fact-checking ecosystem" vs "fact-checking" as agreements.
+
+    Args:
+        span_a (dict): A span dict from `_extract_spans`.
+        span_b (dict): A span dict from `_extract_spans`.
+
+    Returns:
+        bool: True if the spans share a label and overlap, else False.
+    """
+
+    if span_a["label"] != span_b["label"]:
+        return False
+
+    a_start, a_end = span_a.get("start"), span_a.get("end")
+    b_start, b_end = span_b.get("start"), span_b.get("end")
+
+    # Fall back to substring containment when offsets are missing: both annotators index the
+    # same abstract, so a shared substring is the best available proxy for an overlap.
+    if None in (a_start, a_end, b_start, b_end):
+        return span_a["text"] in span_b["text"] or span_b["text"] in span_a["text"]
+
+    # Half-open intervals [start, end) intersect iff each begins before the other ends.
+    return a_start < b_end and b_start < a_end
+
+
 def align_annotations(reference_data: dict, comparison_data: dict):
     """
     Creates binary alignment vectors for all pooled entities across papers shared by
@@ -200,6 +142,93 @@ def align_annotations(reference_data: dict, comparison_data: dict):
             comparison_binary.append(1 if ent in comparison_ents else 0)
 
     return np.array(reference_binary), np.array(comparison_binary), list(common_ids)
+
+
+def load_lm_predictions(filepath: str) -> dict:
+    """
+    Parses LLM (Phi / Qwen) outputs stored in the Label Studio prediction format.
+
+    The LMNER pipeline serialises its results as a single JSON array (despite the
+    `.jsonl` extension), where each task carries its spans under `predictions[0].result`.
+
+    Args:
+        filepath (str): Path to the LLM annotation file (e.g. `phi-4-annotation.jsonl`).
+
+    Returns:
+        dict: A dictionary mapping 'arxiv_id' -> list of span dicts (see `_extract_spans`).
+    """
+
+    lm_data = {}
+
+    with open(filepath, "r", encoding="utf-8") as f:
+        file_data = json.load(f)
+
+    # Ensure file_data is iterable. If it loaded a single root object, wrap it.
+    if isinstance(file_data, dict):
+        file_data = [file_data]
+
+    for task in file_data:
+        if not isinstance(task, dict):
+            continue
+
+        data_block = task.get("data", {})
+        paper_id = str(data_block.get("arxiv_id", "")).strip()
+
+        if not paper_id:
+            continue
+
+        predictions = task.get("predictions", [])
+        if not predictions:
+            continue
+
+        lm_data[paper_id] = _extract_spans(predictions[0].get("result", []))
+
+    return lm_data
+
+
+def load_label_studio_annotations(file_path: str) -> dict:
+    """
+    Parses Label Studio JSON files for NER tasks (human gold annotations).
+
+    Args:
+        file_path (str): Path to the Label Studio annotation JSON file.
+
+    Returns:
+        dict: A dictionary mapping 'arxiv_id' -> list of span dicts (see `_extract_spans`).
+    """
+
+    ls_data = {}
+    file_pattern = Path(file_path)
+
+    for filepath in glob.glob(str(file_pattern)):
+        with open(filepath, "r", encoding="utf-8") as f:
+            file_data = json.load(f)
+
+            # Ensure file_data is iterable. If it loaded a single root object, wrap it.
+            if isinstance(file_data, dict):
+                file_data = [file_data]
+
+            for item in file_data:
+                # If the item itself is a list (nested export), process its internal tasks.
+                tasks_to_process = item if isinstance(item, list) else [item]
+
+                for task in tasks_to_process:
+                    if not isinstance(task, dict):
+                        continue
+
+                    data_block = task.get("data", {})
+                    paper_id = str(data_block.get("arxiv_id", "")).strip()
+
+                    if not paper_id:
+                        continue
+
+                    annotations = task.get("annotations", [])
+                    if not annotations:
+                        continue
+
+                    ls_data[paper_id] = _extract_spans(annotations[0].get("result", []))
+
+    return ls_data
 
 
 def calculate_metrics(reference_vec: np.ndarray, comparison_vec: np.ndarray) -> dict:
@@ -250,35 +279,6 @@ def calculate_metrics(reference_vec: np.ndarray, comparison_vec: np.ndarray) -> 
         "recall": recall_score(reference_vec, comparison_vec, zero_division=0),
         "f1": f1_score(reference_vec, comparison_vec, zero_division=0),
     }
-
-
-def _spans_overlap(span_a: dict, span_b: dict) -> bool:
-    """
-    Decides whether two spans match under relaxed criteria: identical label AND intersecting
-    character ranges. This credits boundary disagreements such as "WikiText-2 dataset" vs
-    "WikiText-2" or "fact-checking ecosystem" vs "fact-checking" as agreements.
-
-    Args:
-        span_a (dict): A span dict from `_extract_spans`.
-        span_b (dict): A span dict from `_extract_spans`.
-
-    Returns:
-        bool: True if the spans share a label and overlap, else False.
-    """
-
-    if span_a["label"] != span_b["label"]:
-        return False
-
-    a_start, a_end = span_a.get("start"), span_a.get("end")
-    b_start, b_end = span_b.get("start"), span_b.get("end")
-
-    # Fall back to substring containment when offsets are missing: both annotators index the
-    # same abstract, so a shared substring is the best available proxy for an overlap.
-    if None in (a_start, a_end, b_start, b_end):
-        return span_a["text"] in span_b["text"] or span_b["text"] in span_a["text"]
-
-    # Half-open intervals [start, end) intersect iff each begins before the other ends.
-    return a_start < b_end and b_start < a_end
 
 
 # pylint: disable=too-many-locals
@@ -429,13 +429,15 @@ def report_comparison(reference_label: str, comparison_label: str, reference_dat
     logger.info("=" * 60)
 
 
+# NOTE: This script should rather support any annotation files as opposed to hardcoding the Phi / Qwen paths.
+# Right now this is low priority.
 def main() -> None:
     """
     Entry point: loads the human, Phi and Qwen annotations and reports pairwise agreement.
     """
 
     current_dir = os.path.dirname(__file__)
-    human_annotations_file_path = resolve_path(current_dir, "human-annotation.json")
+    human_annotations_file_path = resolve_path(current_dir, config.HUMAN_ANNOTATION_FILE)
     phi_annotations_file_path = resolve_path(current_dir, config.PHI_NER_ANNOTATION_FILE)
     qwen_annotations_file_path = resolve_path(current_dir, config.QWEN_NER_ANNOTATION_FILE)
 
