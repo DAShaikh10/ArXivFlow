@@ -170,8 +170,8 @@ moon run annotate:dockerize # Run from ArXivFlow workspace folder.
 NOTE: If building for H100/200 or B200 _(Both are overkill for these models!)_ we need to provide appropriate `CUDA_ARCH` parameter and preferablly a distinct image name:
 
 ```bash
-# H100 -> sm-90 / 9.0
-moon r annotate:dockerize -- --build-arg CUDA_ARCH=9.0 -t dashaikh10/arxivflow-annotate-sm-90:latest
+# H100 / H200 -> sm-90 / 9.0
+moon run annotate:dockerize-sm-90
 ```
 
 Publish the latest arxiv-annotate image to DockerHub _(Running this command will run dockerize command automatically)_:
