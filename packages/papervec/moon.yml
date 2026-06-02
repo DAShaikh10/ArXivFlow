@@ -1,0 +1,81 @@
+layer: tool
+language: python
+
+project:
+  name: papervec
+  description: Research paper embedding generator & storage tool.
+  maintainers: ["@DAShaikh10"]
+
+stack: "data"
+tags:
+  - allenai
+  - chromadb
+  - embeddings
+  - python
+  - specter2
+  - uv
+
+# Each dependency is listed explicitly.
+dependsOn:
+  - annotate
+  - crucible
+
+docker:
+  file:
+    # moon requires bash, curl and uv requires python and hence this is the minimal image for build stages.
+    image: python:3.14-slim
+    template: "packages/papervec/Dockerfile.tera"
+  scaffold:
+    configsPhaseGlobs:
+      - "pyproject.toml"
+      - "uv.lock"
+    sourcesPhaseGlobs:
+      - "src/**/*"
+
+tasks:
+  clean:
+    command: bash
+    args:
+      - scripts/clean.sh
+    description: Clean virtualenvs, Python cache, and uv lockfiles.
+
+  dockerize:
+    command: docker build
+    args:
+      - --platform
+      - linux/amd64
+      - -t
+      - dashaikh10/arxivflow-papervec:latest
+      - -f
+      - packages/papervec/Dockerfile
+      - .
+    description: Build the ArXivFlow PaperVec Docker image. Use with `-- --no-cache` for a fresh build.
+    options:
+      # Docker command needs to be executed from the workspace per moon's requirements.
+      runFromWorkspaceRoot: true
+
+  embeddings:
+    command: uv run -m src.lib.allenai.main
+    description: "Generate paper embeddings using the SPECTER2 model + Apdater."
+
+  format:
+    command: black .
+    description: Format code using Black.
+
+  format-check:
+    command: black --check .
+    description: Check code formatting using Black.
+
+  lint:
+    command: pylint .
+    description: Lint code using Pylint.
+
+  publish:
+    command: docker push dashaikh10/arxivflow-papervec:latest
+    description: Publish the ArXivFlow PaperVec Docker image to DockerHub.
+    deps:
+      - dockerize
+
+  sync:
+    command: uv sync
+    description: Sync (create .venv, install missing dependencies) the project environment (generate / with the lockfile).
