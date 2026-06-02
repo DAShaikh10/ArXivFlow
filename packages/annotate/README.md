@@ -38,6 +38,8 @@ Annotate the scraped dataset using **Kubernetes** deployment of [Label Studio][l
 | Qwen 2.5 14B Instruct | Qwen/Qwen2.5-14B-Instruct |               29.6 GB               |
 |    Microsoft phi 4    |      microsoft/phi-4      |               29.3 GB               |
 
+- Post-processs annotations to produce normalized canonical list of NER labels, ready to be used as metadata in ChromaDB.
+
 ---
 
 ## Task Management with Moon
@@ -100,6 +102,10 @@ Ensure your copied `.env` properties have real values filled in before executing
 │ │ │ ├── `gliner.py`             # GLiNER model and NER inference logic
 │ │ │ ├── `lmner.py`              # Language Model NER inference logic
 │ │ │ └── `schema.py`             # data schema for annotations
+│ │ ├── postprocess/
+│ │ │ ├── `__init__.py`           # package initializer for postprocess module
+│ │ │ ├── `config.py`             # post-processing configuration values
+│ │ │ └── `extract_tags.py`       # tag extraction and post-processing logic
 │ │ └── quality/
 │ │   ├── `__init__.py`           # package initializer for quality module
 │ │   ├── `config.py`             # IAA configuration values
@@ -107,6 +113,7 @@ Ensure your copied `.env` properties have real values filled in before executing
 │ ├── `logs/`                     # directory for runtime logs and output artifacts
 │ └── utils/
 │   ├── `__init__.py`             # utilities package initializer
+│   ├── `annotations.py`          # annotation helper utilities
 │   ├── `logger.py`               # logging setup and helpers
 │   └── `path.py`                 # path utilities used across the package
 ├── `Dockerfile`                  # container image build for the annotate service(s)
@@ -212,6 +219,13 @@ Connect to ArXivFlow PVC
 <img img src = "assets/connect.png" alt = "Review Source Image"/>
 
 </div>
+
+Download the annotations to run post-process scripts followed uploading the canonical tags.
+
+```bash
+kubectl cp ./data/canonical_map.json arxivflow-pvc-inspector:/data/arxivflow/data/ # Run from ArXivFlow workspace folder.
+```
+
 
 ### NER using GLiNER Large 2.1
 
