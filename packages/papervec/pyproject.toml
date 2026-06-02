@@ -1,7 +1,7 @@
 [project]
 name = "papervec"
 version = "1.0.0"
-description = "Research paper embedding generator tool"
+description = "Research paper embedding generator & storage tool"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
