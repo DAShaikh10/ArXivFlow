@@ -32,6 +32,7 @@ docker:
       - "uv.lock"
     sourcesPhaseGlobs:
       - "src/**/*"
+      - "!src/lib/postprocess/" # Exclude post-process module from the image; cleanup runs offline before fusion.
       - "!src/lib/quality/" # Exclude quality module from the image as it's only used for evaluation.
 
 tasks:
@@ -74,6 +75,12 @@ tasks:
     options:
       # Docker command needs to be executed from the workspace per moon's requirements.
       runFromWorkspaceRoot: true
+
+  extract-tags:
+    command: uv run -m src.lib.postprocess.extract_tags
+    description:
+      Extract and review tags from Label Studio annotation JSON files to create a canonical map for NER normalization.
+      Input files can be passed as CLI arguments.
 
   format:
     command: black .
