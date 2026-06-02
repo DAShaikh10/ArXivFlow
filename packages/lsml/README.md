@@ -192,11 +192,6 @@ Add the following labelling information to the Label Studio Labelling instructio
     Learning", "LoRA", "RLHF", "Parameter-Efficient Fine-Tuning").
   </li>
   <li>
-    <strong>Prompting Strategy</strong>: Interaction mechanisms or prompt
-    engineering paradigms used with frozen LLMs (e.g., "Chain-of-Thought",
-    "In-Context Learning", "Tree-of-Thoughts").
-  </li>
-  <li>
     <strong>Dataset or Benchmark Name</strong>: Concrete named corpora,
     evaluation suites, or leaderboards (e.g., "SQuAD", "GLUE", "MMLU", "GSM8K").
   </li>
@@ -207,13 +202,18 @@ Add the following labelling information to the Label Studio Labelling instructio
   </li>
   <li>
     <strong>Evaluation Metric</strong>: Mathematical, automated, or human
-    validation metrics used to measure success (e.g., "ROUGE-L", "BLEU score",
+    validation metrics used to measure success (e.g., "ROUGE-L", "BLEU",
     "Perplexity", "Human Likert Scale").
   </li>
   <li>
     <strong>Language or Dialect</strong>: The specific languages, variations, or
     linguistic properties targeted (e.g., "Low-resource languages", "African
     dialects", "Code-switched Hindi-English", "Multilingual").
+  </li>
+  <li>
+    <strong>Inference Technique</strong>: Decoding or runtime strategies applied
+    at inference time (not training), used to generate or select outputs (e.g.,
+    "k-Shot", "Beam Search", "Greedy Decoding", "Nucleus Sampling", "Speculative Decoding").
   </li>
 </ul>
 
