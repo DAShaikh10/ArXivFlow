@@ -28,7 +28,7 @@ spec:
             - name: ssh-key
               mountPath: /root/.ssh # Mount the secret with the SSH key to the container.
       nodeSelector:
-        gpu: k80 # Ada Lovelace 24GB GDDR6 GPU node.
+        gpu: l4 # Ada Lovelace 24GB GDDR6 GPU node.
       restartPolicy: Never
 
       volumes:
