@@ -2,14 +2,14 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: allenai-specter-2-proximity-embeddings
+  name: allenai-specter-2-proximity-embedding
 spec:
   template:
     spec:
       securityContext:
         runAsUser: 0 # Run Docker image as user root.
       containers:
-        - name: arxivflow-embeddings
+        - name: arxivflow-embedding
           image: dashaikh10/arxivflow-papervec:latest
           command: ["python", "-m", "src.lib.allenai.main"]
           envFrom:
@@ -21,14 +21,14 @@ spec:
           volumeMounts:
             - name: arxivflow-pvc
               mountPath: /app/data # Mount the persistent volume claim to the container in the path /app/data.
-              subPath: arxivflow/db
+              subPath: arxivflow/data
             - name: arxivflow-pvc
               mountPath: /app/src/logs
               subPath: arxivflow/papervec/logs
             - name: ssh-key
               mountPath: /root/.ssh # Mount the secret with the SSH key to the container.
       nodeSelector:
-        gpu: l4 # Ada Lovelace 24GB GDDR6 GPU node.
+        gpu: k80 # Ada Lovelace 24GB GDDR6 GPU node.
       restartPolicy: Never
 
       volumes:
