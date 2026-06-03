@@ -226,6 +226,11 @@ Download the annotations to run post-process scripts followed uploading the cano
 kubectl cp ./data/canonical_map.json arxivflow-pvc-inspector:/data/arxivflow/data/ # Run from ArXivFlow workspace folder.
 ```
 
+Also, copy over the human annotations onto the **arxivflow-pvc**.
+
+```bash
+kubectl cp ./data/human-annotations.json arxivflow-pvc-inspector:/data/arxivflow/data/ # Run from ArXivFlow workspace folder.
+```
 
 ### NER using GLiNER Large 2.1
 
