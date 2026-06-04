@@ -3,6 +3,9 @@
 # or both values.
 projects:
   annotate: "packages/annotate"
+  "api": "apps/api"
+  client: "apps/client"
+  compass: "packages/compass"
   crucible: "packages/crucible"
   lsml: "packages/lsml"
   papervec: "packages/papervec"
