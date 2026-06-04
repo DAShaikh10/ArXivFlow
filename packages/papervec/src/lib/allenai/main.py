@@ -15,6 +15,30 @@ from src.utils import logger, resolve_path
 from . import config, tags
 from .specter import Specter2Proximity
 
+
+def _metadata_with_authors(
+    arxiv_id: str, authors_by_id: Dict[str, str], tags_by_id: list[str]
+) -> Dict[str, bool | str] | None:
+    """
+    Merge canonical tags with the author string; returns None when the paper has neither.
+
+    Args:
+        arxiv_id (str): The arXiv ID of the paper for which to build metadata.
+        authors_by_id (Dict[str, str]): A mapping from arXiv ID to a semicolon-separated string of authors.
+        tags_by_id (list[str]): A list of canonical tags associated with the paper.
+
+    Returns:
+        Dict[str, bool | str] | None: A dictionary containing canonical tags and author string for the given paper,
+        or None if the paper has neither tags nor authors.
+    """
+
+    metadata: Dict[str, bool | str] = dict(tags.metadata_for(arxiv_id, tags_by_id) or {})
+    author_str: str | None = authors_by_id.get(arxiv_id)
+    if author_str:
+        metadata["authors"] = author_str
+    return metadata or None
+
+
 if __name__ == "__main__":
     # Initialize WandB and log configuration.
     wandb.init(
@@ -59,8 +83,17 @@ if __name__ == "__main__":
     paper_tags = tags.build_paper_tags(tags.load_records(annotation_path), canonical_map)
 
     arxiv_ids: list[str] = papers.get("arxiv_id").tolist()
-    # Aligned with `arxiv_ids`; untagged papers get `None` (Chroma rejects empty metadata dicts).
-    metadatas: list[Dict[str, bool] | None] = [tags.metadata_for(arxiv_id, paper_tags) for arxiv_id in arxiv_ids]
+    authors_list: list[list[str] | None] = papers.get("authors").tolist().tolist()
+
+    author_map: Dict[str, str] = {}
+    for paper_id, authors in zip(arxiv_ids, authors_list):
+        if isinstance(authors, list) and authors:
+            author_map[paper_id] = "; ".join(author for author in authors if author)
+
+    # Aligned with `arxiv_ids`; papers with neither tags nor authors get `None` (Chroma rejects empty dicts).
+    metadatas: list[Dict[str, bool | str] | None] = [
+        _metadata_with_authors(id, author_map, paper_tags) for id in arxiv_ids
+    ]
     num_tagged = sum(1 for metadata in metadatas if metadata)
     logger.info("%d of %d papers carry canonical tags", num_tagged, len(arxiv_ids))
     wandb.log({"num_papers_tagged": num_tagged})

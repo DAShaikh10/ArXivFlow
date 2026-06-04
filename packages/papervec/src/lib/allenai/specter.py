@@ -115,7 +115,7 @@ class Specter2Proximity:
 
         # NOTE: This code assumes ample memory availability & hence does not employ any memory-efficient techniques.
         papers: pd.DataFrame = pd.read_json(dataset_path, encoding=encoding, lines=True)[
-            ["arxiv_id", "title", "abstract"]
+            ["arxiv_id", "title", "abstract", "authors"]
         ]
         records = papers.to_dict(orient="records")
 
