@@ -25,6 +25,7 @@ class ArXivMetadata(TypedDict):
 
     abstract: str
     arxiv_id: str
+    authors: List[str]
     influential_citations: int
     published_date: str
     references: List[Reference]

@@ -163,11 +163,18 @@ class ArXiv:
             published_date_elem = entry.find("atom:published", ns)
             published_date = published_date_elem.text.strip() if published_date_elem is not None else ""
 
+            authors = [
+                name_elem.text.strip()
+                for author_elem in entry.findall("atom:author", ns)
+                if (name_elem := author_elem.find("atom:name", ns)) is not None and name_elem.text
+            ]
+
             entries.append(
                 {
                     "arxiv_id": arxiv_id,
                     "title": title,
                     "abstract": abstract,
+                    "authors": authors,
                     "influential_citations": 0,
                     "published_date": published_date,
                     "references": [],
