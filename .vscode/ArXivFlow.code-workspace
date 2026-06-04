@@ -5,8 +5,20 @@
       "path": "../",
     },
     {
+      "name": "api",
+      "path": "../apps/api",
+    },
+    {
+      "name": "client",
+      "path": "../apps/client",
+    },
+    {
       "name": "annotate",
       "path": "../packages/annotate",
+    },
+    {
+      "name": "compass",
+      "path": "../packages/compass",
     },
     {
       "name": "crucible",
