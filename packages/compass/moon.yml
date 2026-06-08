@@ -1,0 +1,7 @@
+layer: tool
+language: python
+
+project:
+  name: compass
+  description: Research paper recommendation package.
+  maintainers: ["@DAShaikh10"]
