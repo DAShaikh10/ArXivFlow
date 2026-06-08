@@ -1,0 +1,7 @@
+layer: application
+language: python
+
+project:
+  name: api
+  description: ArXivFlow backend — paper listings & SPECTER2 embedding neighbors over ChromaDB.
+  maintainers: ["@DAShaikh10"]

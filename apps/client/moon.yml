@@ -1,0 +1,15 @@
+layer: application
+language: typescript
+
+project:
+  name: client
+  description: ArXivFlow frontend — semantic paper retrieval & embedding atlas.
+  maintainers: ["@DAShaikh10"]
+
+stack: frontend
+tags:
+  - bun
+  - next
+  - react
+  - scss
+  - typescript
