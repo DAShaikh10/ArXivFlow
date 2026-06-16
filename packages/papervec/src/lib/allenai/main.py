@@ -83,7 +83,7 @@ if __name__ == "__main__":
     paper_tags = tags.build_paper_tags(tags.load_records(annotation_path), canonical_map)
 
     arxiv_ids: list[str] = papers.get("arxiv_id").tolist()
-    authors_list: list[list[str] | None] = papers.get("authors").tolist().tolist()
+    authors_list: list[list[str] | None] = papers.get("authors").tolist()
 
     author_map: Dict[str, str] = {}
     for paper_id, authors in zip(arxiv_ids, authors_list):
