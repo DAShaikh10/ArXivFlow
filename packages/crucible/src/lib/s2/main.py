@@ -7,8 +7,8 @@ fetched from ArXiv API using Semanic Scholar API.
 
 import asyncio
 import os
-import wandb
 
+import wandb
 from src.utils import logger, resolve_path
 
 from . import config
