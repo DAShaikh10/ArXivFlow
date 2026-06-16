@@ -1,0 +1,46 @@
+[project]
+name = "api"
+version = "1.0.0"
+description = "ArXivFlow backend - Serves the recommender(s) and API endpoints."
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "chromadb",
+    "fastapi",
+    "orjson",
+    "pandas",
+    "python-dotenv",
+    "uvicorn[standard]",
+]
+
+[dependency-groups]
+# umap-learn + scikit-learn are only needed by `scripts/build_atlas.py`, which runs offline to
+# precompute the 2D atlas projection. Keeping them out of [project.dependencies] mirrors crucible's
+# streamlit workaround: `moon docker setup` installs only main deps, so the served image stays lean.
+dev = [
+    "black",
+    "pylint",
+    "ruff",
+    "scikit-learn",
+    "umap-learn",
+]
+
+[tool.black]
+line-length = 120
+target-version = ["py314"]
+
+[tool.pylint.main]
+ignore = [
+    ".venv",
+    "__pycache__"
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+
+[tool.ruff.lint]
+extend-select = ["I"]
