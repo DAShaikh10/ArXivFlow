@@ -7,6 +7,7 @@ Log the process and artifacts to both locally and on Weights & Biases for tracki
 """
 
 import asyncio
+
 import wandb
 
 from . import config
