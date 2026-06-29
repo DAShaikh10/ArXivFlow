@@ -91,6 +91,7 @@ Ensure your copied `.env` properties have real values filled in before executing
 │ ├── `gliner-ner-extraction.yml` # Kubernetes job/manifest for GLiNER NER extraction
 │ ├── `label-studio.yml`          # Kubernetes deployment for Label Studio
 │ ├── `phi-4-ner-extraction.yml`  # Kubernetes job/manifest for Phi-4 NER extraction
+│ ├── `pvc-inspector.yml`         # Long-lived pod mounting arxivflow-pvc for kubectl cp in/out
 │ └── `qwen25-ner-extraction.yml` # Kubernetes job/manifest for Qwen 2.5 NER extraction
 ├── scripts/
 │ └── `clean.sh`                  # cleanup helper for local or containerized runs
@@ -260,6 +261,45 @@ kubectl apply -f k8s/qwen25-ner-extraction.yml
 
 ```bash
 kubectl apply -f k8s/phi-4-ner-extraction.yml
+```
+
+#### Download generated annotations for evaluation
+
+Both jobs run NER over the human-annotated evaluation subset and write their annotations back to the **arxivflow-pvc** under `arxivflow/data/`:
+
+- `phi-4-annotation.json` _(+ `phi-4-annotation.raw.json`)_
+- `qwen2.5-14b-instruct-annotation.json` _(+ `qwen2.5-14b-instruct-annotation.raw.json`)_
+
+To run the inter-annotator agreement (IAA) check locally, copy these generated annotations from the PVC down into your local `data/` directory:
+
+```bash
+kubectl apply -f k8s/inspect-pvc.yml # Run from ArXivFlow workspace folder.
+```
+
+Copy the generated annotations into `./data/` _(run from the ArXivFlow workspace folder)_:
+
+```bash
+kubectl cp arxivflow-pvc-inspector:/data/arxivflow/data/phi-4-annotation.json ./data/phi-4-annotation.json  # Run from ArXivFlow workspace folder.
+kubectl cp arxivflow-pvc-inspector:/data/arxivflow/data/qwen2.5-14b-instruct-annotation.json ./data/qwen2.5-14b-instruct-annotation.json  # Run from ArXivFlow workspace folder.
+```
+
+The raw model outputs _(pre-conversion, for diagnosing empty results)_ are optional but recommended:
+
+```bash
+kubectl cp arxivflow-pvc-inspector:/data/arxivflow/data/phi-4-annotation.raw.json ./data/phi-4-annotation.raw.json  # Run from ArXivFlow workspace folder.
+kubectl cp arxivflow-pvc-inspector:/data/arxivflow/data/qwen2.5-14b-instruct-annotation.raw.json ./data/qwen2.5-14b-instruct-annotation.raw.json  # Run from ArXivFlow workspace folder.
+```
+
+With `human-annotations.json`, `phi-4-annotation.json` and `qwen2.5-14b-instruct-annotation.json` all present in `data/`, run the agreement check _(Human vs Phi, Human vs Qwen, Qwen vs Phi)_:
+
+```bash
+moon run annotate:iaa
+```
+
+Tear down the inspector pod once the files are copied:
+
+```bash
+kubectl delete -f k8s/inspect-pvc.yml # Run from ArXivFlow workspace folder.
 ```
 
 Cleanup resources _(pod, job)_ after task completion:
