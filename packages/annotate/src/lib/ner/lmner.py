@@ -22,6 +22,7 @@ import wandb
 from src.utils import logger, resolve_path
 
 from . import config
+from .examples import build_fewshot_messages
 from .schema import FIELD_TO_LABEL, ArXivEntities
 
 
@@ -341,12 +342,18 @@ def extract_entities(abstracts: DataFrame) -> List[RequestOutput]:
         " separate the model architecture (the structural backbone, e.g. 'Transformer') from the training method (how"
         " it is optimized or adapted, e.g. 'fine-tuning').\n"
         "6. No Empty Values: Never output empty strings or whitespace-only items. If you are unsure, omit the item.\n"
-        "7. Output: Generate only the requested JSON."
+        "7. Output: Generate only the requested JSON.\n"
+        "8. Worked Examples: Several solved abstracts are provided below as prior user/assistant turns. They are "
+        "human-curated gold; mirror their labeling decisions and JSON format exactly when annotating the final "
+        "abstract."
     )
+
+    few_shot_messages: List[Dict[str, str]] = build_fewshot_messages()
 
     conversations: List[List[Dict[str, str]]] = [
         [
             {"role": "system", "content": system_prompt},
+            *few_shot_messages,
             {"role": "user", "content": f"Abstract:\n{abstract}"},
         ]
         for abstract in abstracts["abstract"]
