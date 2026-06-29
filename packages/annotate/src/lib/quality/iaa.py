@@ -20,6 +20,7 @@ from sklearn.metrics import (
     recall_score,
 )
 
+from src.lib.ner.examples import FEW_SHOT_ARXIV_IDS
 from src.utils import logger, resolve_path
 
 from . import config
@@ -449,6 +450,14 @@ def main() -> None:
 
     logger.debug("Loading Qwen NER predictions...")
     qwen_annotations = load_lm_predictions(qwen_annotations_file_path)
+
+    # The few-shot abstracts are shown to Phi/Qwen as worked examples, so the models would be graded
+    # on inputs whose gold answers they saw — inflating agreement. Dropping them.
+    if FEW_SHOT_ARXIV_IDS:
+        logger.info("Excluding %d few-shot example(s) from the eval: %s", len(FEW_SHOT_ARXIV_IDS), FEW_SHOT_ARXIV_IDS)
+        for dataset in (human_annotations, phi_annotations, qwen_annotations):
+            for arxiv_id in FEW_SHOT_ARXIV_IDS:
+                dataset.pop(arxiv_id, None)
 
     report_comparison("Human", "Phi", human_annotations, phi_annotations)
     report_comparison("Human", "Qwen", human_annotations, qwen_annotations)
