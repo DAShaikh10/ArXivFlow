@@ -1,0 +1,46 @@
+[project]
+name = "compass"
+version = "1.0.0"
+description = "Research paper recommendation & evaluation package"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "chromadb",
+    "numpy",
+    "python-dotenv",
+    "rank-bm25",
+    "sentence-transformers",
+]
+
+[dependency-groups]
+dev = [
+    "black",
+    "pylint",
+    "ruff",
+]
+# The corpus-relatedness Streamlit app (src/lib/relatedness). Kept out of the core deps so the eval
+# harness stays lean. Run: `uv run --group app streamlit run src/lib/relatedness/app.py`.
+app = [
+    "pandas",
+    "streamlit",
+]
+
+[tool.black]
+line-length = 120
+target-version = ["py314"]
+
+[tool.pylint.main]
+ignore = [
+    ".venv",
+    "__pycache__"
+]
+
+[tool.pylint.format]
+max-line-length = 120
+
+[tool.ruff]
+line-length = 120
+target-version = "py314"
+
+[tool.ruff.lint]
+extend-select = ["I"]
