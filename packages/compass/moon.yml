@@ -3,5 +3,41 @@ language: python
 
 project:
   name: compass
-  description: Research paper recommendation package.
+  description: Research paper recommendation & evaluation package
   maintainers: ["@DAShaikh10"]
+
+stack: "data"
+tags:
+  - chromadb
+  - evaluation
+  - python
+  - recommender
+  - uv
+
+# Reads the embeddings papervec writes and the dataset crucible produces.
+dependsOn:
+  - crucible
+  - papervec
+
+tasks:
+  clean:
+    command: bash
+    args:
+      - scripts/clean.sh
+    description: Clean virtualenvs, Python cache, and uv lockfiles.
+
+  format:
+    command: black .
+    description: Format code using Black.
+
+  format-check:
+    command: black --check .
+    description: Check code formatting using Black.
+
+  lint:
+    command: pylint .
+    description: Lint code using Pylint.
+
+  sync:
+    command: uv sync
+    description: Sync (create .venv, install missing dependencies) the project environment.
