@@ -1,0 +1,8 @@
+# Build output & dependencies
+.next
+out
+node_modules
+
+# Generated / managed files (don't reformat — they're rewritten by their tools)
+next-env.d.ts
+bun.lock

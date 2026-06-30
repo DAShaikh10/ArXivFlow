@@ -1,0 +1,35 @@
+{
+  "name": "@arxivflow/client",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "ArXivFlow frontend — semantic paper retrieval & embedding atlas",
+  "scripts": {
+    "dev": "bun --bun next dev",
+    "build": "bun --bun next build",
+    "start": "bun --bun next start",
+    "lint": "eslint .",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "next": ">=16.2.6",
+    "react": ">=19.2.6",
+    "react-dom": ">=19.2.6"
+  },
+  "devDependencies": {
+    "@types/node": ">=25.9.0",
+    "@types/react": ">=19.2.13",
+    "@types/react-dom": ">=19.2.3",
+    "eslint": "^9.39.4",
+    "eslint-config-next": ">=16.2.6",
+    "prettier": ">=3.8.3",
+    "sass": ">=1.99.0",
+    "typescript": ">=6.0.3"
+  },
+  "engines": {
+    "bun": ">=1.2.0",
+    "node": ">=22.11.0"
+  }
+}

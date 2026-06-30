@@ -1,0 +1,6 @@
+telemetry = false
+
+[install]
+# Use Bun's textual lockfile (bun.lock) instead of the binary one.
+saveTextLockfile = true
+exact = true
