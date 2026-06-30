@@ -1,0 +1,31 @@
+// -----------------------------------------------------------------------------
+// Minimal reset (ported from the prototype's global rules).
+// -----------------------------------------------------------------------------
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+}
+
+input,
+select {
+  font-family: inherit;
+}
+
+a {
+  color: inherit;
+}

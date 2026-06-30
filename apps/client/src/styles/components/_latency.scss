@@ -1,0 +1,141 @@
+// -----------------------------------------------------------------------------
+// Latency badge — shows real API round-trip time, with an optional stage popover.
+// -----------------------------------------------------------------------------
+
+@use "../abstracts" as *;
+
+.af-lat-inline {
+  font-family: var(--body-serif);
+  font-style: italic;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  transition: 0.13s;
+
+  &:hover {
+    color: var(--text);
+  }
+}
+
+.af-lat-wrap {
+  position: relative;
+  display: inline-block;
+}
+
+.af-lat {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  padding: 6px 11px;
+  border-radius: 9px;
+  transition: 0.15s;
+  cursor: pointer;
+
+  &:hover {
+    border-color: var(--accent-ink);
+  }
+
+  &.busy {
+    color: var(--text-faint);
+  }
+}
+
+.af-lat-main b {
+  color: var(--text);
+  font-weight: 600;
+  font-size: 13px;
+}
+
+.af-lat-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5);
+  animation: pulse 2s infinite;
+
+  &.spin {
+    background: var(--accent);
+    animation: none;
+  }
+}
+
+.af-lat-pop {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 260px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-pop);
+  padding: 14px;
+  z-index: $z-popover;
+  cursor: default;
+}
+
+.af-lat-pop-h {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 11px;
+}
+
+.af-lat-stage {
+  display: grid;
+  grid-template-columns: 74px 1fr 52px;
+  align-items: center;
+  gap: 9px;
+  margin-bottom: 8px;
+}
+
+.af-lat-k {
+  font-size: 11.5px;
+  color: var(--text-dim);
+}
+
+.af-lat-track {
+  height: 6px;
+  background: var(--surface-2);
+  border-radius: 3px;
+  overflow: hidden;
+
+  i {
+    display: block;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 3px;
+  }
+}
+
+.af-lat-v {
+  font-size: 11px;
+  text-align: right;
+  color: var(--text);
+}
+
+.af-lat-tot {
+  display: flex;
+  justify-content: space-between;
+  border-top: 1px solid var(--border);
+  margin-top: 6px;
+  padding-top: 9px;
+  font-size: 11.5px;
+  color: var(--text-dim);
+
+  b {
+    color: var(--text);
+    font-size: 13px;
+  }
+}

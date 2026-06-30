@@ -1,0 +1,45 @@
+// -----------------------------------------------------------------------------
+// Reusable mixins.
+// -----------------------------------------------------------------------------
+
+@use "sass:map";
+@use "variables" as *;
+
+$_breakpoints: (
+  "mobile": $bp-mobile,
+  "tablet": $bp-tablet,
+  "desktop": $bp-desktop,
+);
+
+/// Media query helper: `@include respond-to("tablet") { ... }` -> max-width query.
+@mixin respond-to($name) {
+  @if map.has-key($_breakpoints, $name) {
+    @media (max-width: map.get($_breakpoints, $name)) {
+      @content;
+    }
+  } @else {
+    @error "Unknown breakpoint `#{$name}`. Known: #{map.keys($_breakpoints)}.";
+  }
+}
+
+/// Truncate text to a fixed number of lines.
+@mixin line-clamp($lines) {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+}
+
+/// Centre children with grid.
+@mixin grid-center {
+  display: grid;
+  place-items: center;
+}
+
+/// A surface card: background, border, radius, shadow.
+@mixin card($radius: $radius-lg) {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: $radius;
+}

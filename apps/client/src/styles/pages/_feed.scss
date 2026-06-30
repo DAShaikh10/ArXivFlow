@@ -1,0 +1,267 @@
+// -----------------------------------------------------------------------------
+// Discover feed.
+// -----------------------------------------------------------------------------
+
+@use "../abstracts" as *;
+
+.feed-wrap {
+  max-width: $w-feed;
+  margin: 0 auto;
+  padding: 36px 28px 80px;
+}
+
+.feed-head-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.feed-eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-family: var(--mono);
+  font-size: 11.5px;
+  font-weight: 500;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-bottom: 13px;
+}
+
+.feed-eyebrow-dot {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  flex: none;
+  position: relative;
+  border: 2px solid color-mix(in oklch, var(--accent) 42%, transparent);
+
+  &::after {
+    content: "";
+    position: absolute;
+    inset: 2.5px;
+    border-radius: 50%;
+    background: var(--accent);
+  }
+}
+
+.feed-h1 {
+  font-family: var(--serif);
+  font-size: 34px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  margin: 0 0 4px;
+}
+
+.feed-lede {
+  font-family: var(--body-serif);
+  font-size: 16px;
+  color: var(--text-dim);
+  margin: 0;
+  max-width: 54ch;
+}
+
+.feed-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 22px;
+  padding-top: 18px;
+  border-top: 1px solid var(--border);
+  flex-wrap: wrap;
+}
+
+.feed-sorts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.feed-sort {
+  font-size: 13px;
+  font-weight: 500;
+  padding: 7px 13px;
+  border-radius: 8px;
+  color: var(--text-dim);
+  transition: 0.13s;
+
+  &:hover {
+    background: var(--surface-2);
+    color: var(--text);
+    box-shadow: inset 0 0 0 1px var(--border);
+  }
+
+  &.on {
+    background: var(--text);
+    color: var(--bg);
+  }
+}
+
+.feed-selects {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.feed-sel {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 12px;
+  color: var(--text-faint);
+
+  select {
+    font-size: 12.5px;
+    color: var(--text);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 9px;
+    max-width: 200px;
+  }
+}
+
+.feed-count {
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-faint);
+
+  b {
+    color: var(--text-dim);
+  }
+}
+
+.feed-list {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feed-empty {
+  padding: 60px 0;
+  text-align: center;
+  color: var(--text-faint);
+  font-family: var(--body-serif);
+  font-style: italic;
+}
+
+.feed-card {
+  padding: 24px 26px;
+  @include card;
+  box-shadow: var(--shadow);
+  transition:
+    border-color 0.15s,
+    box-shadow 0.15s;
+
+  &:hover {
+    border-color: color-mix(in oklch, var(--accent) 40%, var(--border));
+  }
+
+  .density-compact & {
+    padding: 18px 20px;
+  }
+}
+
+.feed-cats {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+
+.feed-id {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
+.feed-date {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin-left: auto;
+}
+
+.feed-title {
+  font-family: var(--serif);
+  font-size: 21px;
+  font-weight: 600;
+  line-height: 1.32;
+  letter-spacing: -0.011em;
+  margin: 0 0 7px;
+  cursor: pointer;
+  transition: 0.13s;
+  text-align: left;
+  text-decoration: none;
+  display: block;
+
+  &:hover {
+    color: var(--accent-ink);
+  }
+
+  .density-compact & {
+    font-size: 18px;
+  }
+}
+
+.feed-auth {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 10px;
+}
+
+.feed-abs {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+
+  > p {
+    overflow: hidden;
+    margin: 0;
+    font-family: var(--body-serif);
+    font-size: 15.5px;
+    line-height: 1.62;
+    color: var(--text-dim);
+    max-width: 72ch;
+  }
+
+  &.open {
+    grid-template-rows: 1fr;
+
+    > p {
+      padding-bottom: 4px;
+    }
+  }
+}
+
+.feed-acts {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+.feed-cited {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text-faint);
+  margin-left: 8px;
+}
+
+.feed-match {
+  margin-left: auto;
+  font-size: 12px;
+  color: var(--text-faint);
+  font-family: var(--mono);
+
+  b {
+    color: var(--text);
+    font-weight: 600;
+  }
+}

@@ -1,0 +1,55 @@
+// -----------------------------------------------------------------------------
+// Design tokens as CSS custom properties.
+//
+// Theme switching is done at runtime by toggling `.dark` and injecting a handful
+// of properties (--accent, --accent-soft, --sans/--serif/--body-serif/--mono)
+// from lib/theme.tsx. Everything derived from the theme lives here.
+// -----------------------------------------------------------------------------
+
+// Reading Room (light) — the default palette.
+.af-root {
+  --bg: #edf3f8;
+  --surface: #ffffff;
+  --surface-2: #d9f0fc;
+  --border: #e2ebf1;
+  --border-soft: #eef3f7;
+  --text: #1d2a36;
+  --text-dim: #566676;
+  --text-faint: #92a6b6;
+  --ring-track: #d9f0fc;
+  --spark-dot: #bcdcee;
+  --atlas-sel: #1d2a36;
+  --accent-ink: color-mix(in oklch, var(--accent), #000 54%);
+  --on-accent: color-mix(in oklch, var(--accent), #000 72%);
+  --shadow: 0 1px 2px rgba(40, 80, 120, 0.05), 0 8px 24px rgba(40, 80, 120, 0.07);
+  --shadow-pop: 0 12px 40px rgba(30, 70, 110, 0.16);
+  --canvas-bg: #eaf5fd;
+
+  color: var(--text);
+  background: var(--bg);
+  font-family: var(--sans);
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  -webkit-font-smoothing: antialiased;
+}
+
+// Dark.
+.af-root.dark {
+  --bg: #0e1116;
+  --surface: #161b22;
+  --surface-2: #1c222c;
+  --border: #28303c;
+  --border-soft: #20262f;
+  --text: #e8ecf3;
+  --text-dim: #9aa3b1;
+  --text-faint: #5e6775;
+  --ring-track: #252d3a;
+  --spark-dot: #39424f;
+  --atlas-sel: #ffffff;
+  --accent-ink: color-mix(in oklch, var(--accent), #fff 14%);
+  --on-accent: #11161d;
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px rgba(0, 0, 0, 0.35);
+  --shadow-pop: 0 16px 48px rgba(0, 0, 0, 0.55);
+  --canvas-bg: #0b0e13;
+}

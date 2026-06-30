@@ -1,0 +1,30 @@
+// -----------------------------------------------------------------------------
+// Non-themed constants. Runtime theming (colours, fonts) lives in CSS custom
+// properties (see themes/_tokens.scss + lib/theme.tsx); these are the values
+// Sass needs at compile time: breakpoints, z-index layers, shared radii.
+// -----------------------------------------------------------------------------
+
+// Breakpoints ----------------------------------------------------------------
+$bp-mobile: 640px;
+$bp-tablet: 900px;
+$bp-desktop: 1180px;
+
+// Z-index layers -------------------------------------------------------------
+$z-stage: 1;
+$z-atlas-overlay: 6;
+$z-atlas-tip: 8;
+$z-topbar: 20;
+$z-popover: 30;
+$z-panel: 40;
+
+// Content widths -------------------------------------------------------------
+$w-feed: 940px;
+$w-detail: 1120px;
+$w-search: 840px;
+$w-rail: 320px;
+$w-inspector: 350px;
+
+// Radii ----------------------------------------------------------------------
+$radius-sm: 6px;
+$radius-md: 9px;
+$radius-lg: 14px;

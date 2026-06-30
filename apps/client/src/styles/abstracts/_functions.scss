@@ -1,0 +1,10 @@
+// -----------------------------------------------------------------------------
+// Pure helper functions.
+// -----------------------------------------------------------------------------
+
+@use "sass:math";
+
+/// Convert a pixel value to rem (assuming a 16px root).
+@function rem($px, $base: 16) {
+  @return math.div($px, $base) * 1rem;
+}

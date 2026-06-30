@@ -1,0 +1,51 @@
+// -----------------------------------------------------------------------------
+// Loading / error / empty states shared across pages.
+// -----------------------------------------------------------------------------
+
+.af-state {
+  padding: 64px 0;
+  text-align: center;
+  color: var(--text-faint);
+  font-family: var(--body-serif);
+  font-style: italic;
+  font-size: 15px;
+}
+
+.af-spinner {
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 2.5px solid var(--surface-2);
+  border-top-color: var(--accent);
+  animation: spin 0.7s linear infinite;
+  margin: 0 auto 14px;
+}
+
+.af-error {
+  color: #ef4444;
+  font-style: normal;
+  font-family: var(--mono);
+  font-size: 13px;
+}
+
+// Card skeleton (feed loading).
+.af-skel {
+  height: 132px;
+  border-radius: 14px;
+  background: linear-gradient(90deg, var(--surface) 25%, var(--surface-2) 50%, var(--surface) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.3s infinite;
+  border: 1px solid var(--border);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}

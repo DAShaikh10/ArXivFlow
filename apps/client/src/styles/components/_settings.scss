@@ -1,0 +1,144 @@
+// -----------------------------------------------------------------------------
+// Preferences popover: theme, accent, density, font pairing, recommendation count.
+// Promoted from the prototype's design-tool "Tweaks" shell into a real control.
+// -----------------------------------------------------------------------------
+
+@use "../abstracts" as *;
+
+.af-settings-pop {
+  position: absolute;
+  top: calc(100% + 10px);
+  right: 0;
+  width: 280px;
+  @include card(14px);
+  box-shadow: var(--shadow-pop);
+  padding: 16px;
+  z-index: $z-panel;
+}
+
+.af-settings-sec {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin: 16px 0 10px;
+
+  &:first-child {
+    margin-top: 0;
+  }
+}
+
+.af-settings-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+
+  label {
+    font-size: 13px;
+    color: var(--text);
+  }
+}
+
+// Toggle switch -------------------------------------------------------------
+.af-switch {
+  --w: 38px;
+  width: var(--w);
+  height: 22px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  position: relative;
+  transition: 0.18s;
+  flex-shrink: 0;
+
+  &::after {
+    content: "";
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--text-faint);
+    transition: 0.18s;
+  }
+
+  &.on {
+    background: var(--accent);
+    border-color: var(--accent-ink);
+
+    &::after {
+      left: calc(var(--w) - 18px);
+      background: var(--on-accent);
+    }
+  }
+}
+
+// Segmented radio -----------------------------------------------------------
+.af-seg {
+  display: inline-flex;
+  background: var(--surface-2);
+  border-radius: 8px;
+  padding: 2px;
+
+  button {
+    font-size: 12px;
+    font-weight: 500;
+    padding: 5px 11px;
+    border-radius: 6px;
+    color: var(--text-dim);
+    transition: 0.13s;
+    text-transform: capitalize;
+
+    &.on {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+  }
+}
+
+// Accent swatches -----------------------------------------------------------
+.af-swatches {
+  display: flex;
+  gap: 8px;
+}
+
+.af-swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 7px;
+  border: 2px solid transparent;
+  transition: 0.13s;
+
+  &.on {
+    border-color: var(--text);
+  }
+}
+
+// Select + slider -----------------------------------------------------------
+.af-settings-row select {
+  font-size: 12.5px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 6px 9px;
+  text-transform: capitalize;
+}
+
+.af-settings-row input[type="range"] {
+  accent-color: var(--accent);
+  width: 120px;
+}
+
+.af-settings-val {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 14px;
+  text-align: right;
+}

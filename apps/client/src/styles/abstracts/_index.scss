@@ -1,0 +1,4 @@
+// Forward the abstracts layer so consumers can `@use "abstracts" as *;`.
+@forward "variables";
+@forward "functions";
+@forward "mixins";

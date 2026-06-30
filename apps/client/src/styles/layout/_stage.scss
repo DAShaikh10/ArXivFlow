@@ -1,0 +1,18 @@
+// -----------------------------------------------------------------------------
+// The main stage region beneath the top bar.
+// -----------------------------------------------------------------------------
+
+.af-stage {
+  flex: 1;
+  min-height: 0;
+}
+
+.stage-scroll {
+  height: 100%;
+  overflow-y: auto;
+}
+
+.stage-full {
+  height: 100%;
+  overflow: hidden;
+}
