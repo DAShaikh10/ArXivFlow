@@ -1,0 +1,82 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arxivflow-api
+  labels:
+    app: arxivflow-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: arxivflow-api
+  template:
+    metadata:
+      labels:
+        app: arxivflow-api
+    spec:
+      containers:
+        - name: arxivflow-api
+          image: dashaikh10/arxivflow-api:latest
+          ports:
+            - containerPort: 8000
+          envFrom:
+            - secretRef:
+                name: api-env
+          # Startup can be slow on the very first boot (in-container atlas build via UMAP/numba JIT,
+          # then the corpus + ChromaDB load in the FastAPI lifespan). The startupProbe grants up to
+          # ~5 min before liveness kicks in, so k8s doesn't crash-loop the pod mid-build. Pre-seeding
+          # the atlas (step 2 above) makes this near-instant.
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            periodSeconds: 10
+            failureThreshold: 30
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "2Gi"
+            limits:
+              cpu: "2"
+              memory: "8Gi" # torch + transformers/adapters + chroma + the in-memory corpus, plus the
+                            # one-off UMAP/numba atlas build on first boot.
+          volumeMounts:
+            - name: arxivflow-pvc
+              mountPath: /app/data # Corpus + ChromaDB store (read); atlas.json written here on first boot.
+              subPath: arxivflow/data
+            - name: arxivflow-pvc
+              mountPath: /app/src/logs # build_atlas / logger output.
+              subPath: arxivflow/api/logs
+      volumes:
+        - name: arxivflow-pvc
+          persistentVolumeClaim:
+            claimName: arxivflow-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arxivflow-api-service
+  labels:
+    app: arxivflow-api
+spec:
+  selector:
+    app: arxivflow-api
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
