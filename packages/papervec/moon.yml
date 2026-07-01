@@ -58,6 +58,10 @@ tasks:
     command: uv run -m src.lib.allenai.main
     description: "Generate paper embeddings using the SPECTER2 model + Apdater."
 
+  embeddings-scincl:
+    command: uv run -m src.lib.scincl.main
+    description: "Generate paper embeddings using SciNCL (writes to a separate Chroma collection)."
+
   format:
     command: black .
     description: Format code using Black.

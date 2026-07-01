@@ -30,6 +30,9 @@ ignore = [
     "__pycache__"
 ]
 
+[tool.pylint.messages_control]
+disable = ["duplicate-code"]
+
 [tool.pylint.format]
 max-line-length = 120
 
