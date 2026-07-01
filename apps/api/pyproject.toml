@@ -5,11 +5,15 @@ description = "ArXivFlow backend - Serves the recommender(s) and API endpoints."
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
+    "adapters",
     "chromadb",
     "fastapi",
     "orjson",
     "pandas",
     "python-dotenv",
+    "rank-bm25",
+    "torch",
+    "transformers",
     "uvicorn[standard]",
 ]
 
