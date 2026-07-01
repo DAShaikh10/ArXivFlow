@@ -139,7 +139,9 @@ def _dimentionality_reduction(ids: list[str], vectors: np.ndarray):
 
     return n_clusters, labels, coords
 
+
 # pylint: disable=too-many-locals
+
 
 def main() -> None:
     """
@@ -227,6 +229,7 @@ def main() -> None:
         logger.debug("  %s  %s  %s", category["id"], category["count"], category["name"])
 
     logger.debug("main - END")
+
 
 # pylint: enable=too-many-locals
 
