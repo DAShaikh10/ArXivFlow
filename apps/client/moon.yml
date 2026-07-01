@@ -57,5 +57,5 @@ tasks:
       - dockerize
 
   sync:
-    command: bun update
+    command: BUN_CONFIG_REGISTRY=https://registry.npmjs.org bun update
     description: Sync (install missing dependencies) the project environment.
