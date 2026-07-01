@@ -73,6 +73,30 @@ class PaperDetail(PaperSummary):
     topics: list[Topic] = []
 
 
+class SearchResult(PaperSummary):
+    """
+    One ranked hit for a free-text corpus search: a paper summary plus its relevance score.
+    """
+
+    # Relevance in [0, 1], per-result-set normalized so the top hit is 1.0 and the rest descend — only
+    # the ordering is strictly meaningful. Dense min-max rescales cosine across the set; bm25 divides by
+    # the top lexical score.
+    score: float
+
+
+class SearchResponse(BaseModel):
+    """
+    Ranked results for a free-text query, with the recommender used and the measured query latency.
+    """
+
+    query: str
+    # Which recommender produced these results ("rrf" | "dense" | "bm25"), echoed back for the UI.
+    recommender: str = "rrf"
+    items: list[SearchResult]
+    total: int
+    took_ms: float
+
+
 class Neighbor(BaseModel):
     """
     A nearest neighbour returned by a cosine query against the SPECTER2 embeddings.
@@ -89,10 +113,12 @@ class Neighbor(BaseModel):
 
 class NeighborsResponse(BaseModel):
     """
-    Embedding-similarity result set for a paper, with the measured query latency.
+    Related-paper result set for a paper, with the recommender used and the measured query latency.
     """
 
     source_id: str
+    # Which recommender produced these results ("dense" | "bm25"), echoed back for the UI toggle.
+    recommender: str = "dense"
     neighbors: list[Neighbor]
     took_ms: float
 
@@ -142,3 +168,6 @@ class HealthResponse(BaseModel):
     papers: int
     embeddings: int
     atlas_ready: bool
+    # False until the SPECTER2 query encoder finishes warming up; dense search falls back to a
+    # (one-time) in-band load if hit before this flips true.
+    search_ready: bool = False
