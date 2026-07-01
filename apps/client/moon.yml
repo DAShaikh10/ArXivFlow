@@ -55,3 +55,7 @@ tasks:
     description: Publish the ArXivFlow client Docker image to DockerHub.
     deps:
       - dockerize
+
+  sync:
+    command: bun update
+    description: Sync (install missing dependencies) the project environment.
