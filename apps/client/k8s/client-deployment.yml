@@ -1,0 +1,80 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: arxivflow-client
+  labels:
+    app: arxivflow-client
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: arxivflow-client
+  template:
+    metadata:
+      labels:
+        app: arxivflow-client
+    spec:
+      containers:
+        - name: arxivflow-client
+          image: dashaikh10/arxivflow-client:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 3000
+          env:
+            # The Next.js /api/* Route Handler proxies to this at request time (runtime, not baked).
+            - name: API_PROXY_TARGET
+              value: http://arxivflow-api-service:8000
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            periodSeconds: 10
+            timeoutSeconds: 3
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 3000
+            periodSeconds: 20
+            timeoutSeconds: 3
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: arxivflow-client-service
+  labels:
+    app: arxivflow-client
+spec:
+  selector:
+    app: arxivflow-client
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
+  type: ClusterIP
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: arxivflow-demo
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: arxivflow.project.ris.bht-berlin.de
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: arxivflow-client-service
+                port:
+                  number: 3000
