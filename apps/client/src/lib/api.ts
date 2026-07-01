@@ -1,8 +1,8 @@
 // HTTP client for the ArXivFlow API.
 //
-// In the browser we hit same-origin `/api/*`, which next.config.ts rewrites to the FastAPI server
-// (so there are no CORS round-trips in dev). Override with NEXT_PUBLIC_API_BASE when the API lives
-// elsewhere (e.g. a deployed host).
+// In the browser we hit same-origin `/api/*`, which the Route Handler at `src/app/api/[...path]`
+// proxies server-side to the FastAPI backend (so there are no CORS round-trips). Set NEXT_PUBLIC_API_BASE
+// only to bypass the proxy and call a backend host directly from the browser (then CORS applies).
 
 import {
   type AtlasResponse,
