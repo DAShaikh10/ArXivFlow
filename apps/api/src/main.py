@@ -15,7 +15,6 @@ from contextlib import asynccontextmanager
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import ORJSONResponse
 
 from . import config
 from .query_encoder import query_encoder
@@ -42,7 +41,6 @@ app = FastAPI(
     title="ArXivFlow API",
     version="0.1.0",
     description="Paper listings & SPECTER2 embedding neighbours over the indexed arXiv NLP corpus.",
-    default_response_class=ORJSONResponse,
     lifespan=lifespan,
 )
 

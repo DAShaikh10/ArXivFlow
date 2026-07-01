@@ -19,5 +19,4 @@ else
   echo "[entrypoint] atlas present at ${ATLAS_PATH} - skipping build."
 fi
 
-# exec so uvicorn becomes PID 1 and receives SIGTERM directly (clean pod shutdown).
-exec uvicorn src.main:app --host "${API_HOST:-0.0.0.0}" --port "${API_PORT:-8000}"
+exec python -m uvicorn src.main:app --host "${API_HOST:-0.0.0.0}" --port "${API_PORT:-8000}"
