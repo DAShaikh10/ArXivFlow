@@ -141,8 +141,10 @@ dependencies = [
     { name = "pandas" },
     { name = "python-dotenv" },
     { name = "rank-bm25" },
+    { name = "scikit-learn" },
     { name = "torch" },
     { name = "transformers" },
+    { name = "umap-learn" },
     { name = "uvicorn", extra = ["standard"] },
 ]
 
@@ -151,8 +153,6 @@ dev = [
     { name = "black" },
     { name = "pylint" },
     { name = "ruff" },
-    { name = "scikit-learn" },
-    { name = "umap-learn" },
 ]
 
 [package.metadata]
@@ -164,8 +164,10 @@ requires-dist = [
     { name = "pandas" },
     { name = "python-dotenv" },
     { name = "rank-bm25" },
+    { name = "scikit-learn" },
     { name = "torch" },
     { name = "transformers" },
+    { name = "umap-learn" },
     { name = "uvicorn", extras = ["standard"] },
 ]
 
@@ -174,8 +176,6 @@ dev = [
     { name = "black" },
     { name = "pylint" },
     { name = "ruff" },
-    { name = "scikit-learn" },
-    { name = "umap-learn" },
 ]
 
 [[package]]

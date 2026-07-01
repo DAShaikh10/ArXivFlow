@@ -11,17 +11,30 @@ from dotenv import load_dotenv
 
 load_dotenv(override=True)
 
-# apps/api/src/config.py -> apps/api/src -> apps/api -> apps -> <workspace root>
-WORKSPACE_ROOT: Path = Path(__file__).resolve().parents[3]
+# Directory holding this file: `<root>/apps/api/src` locally, `/app/src` in the Docker image
+# (the Dockerfile flattens the sources), so we can't assume a fixed monorepo depth.
+_CURRENT_DIR: str = os.path.dirname(os.path.abspath(__file__))
 
 
 def _resolve(relative: str) -> Path:
     """
-    Resolve a workspace-relative path to an absolute one.
+    Resolve a data-artifact path relative to the data directory, honouring the `DATA_DIR` override.
+
+    Mirrors `packages/papervec/src/utils/path.py`: locally the data dir is `<root>/data`; in the
+    Docker image the sources live at `/app/src` and the PVC is mounted at `/app/data`. `DATA_DIR`
+    overrides both. An absolute `relative` value is returned unchanged (pathlib join semantics).
     """
 
-    path = Path(relative)
-    return path if path.is_absolute() else (WORKSPACE_ROOT / path)
+    normalized = _CURRENT_DIR.replace("\\", "/")
+    if "apps/api" in normalized:
+        # Local monorepo: <root>/apps/api/src -> <root>
+        project_root = os.path.abspath(os.path.join(_CURRENT_DIR, "../../.."))
+    else:
+        # Docker image: /app/src -> /app
+        project_root = os.path.abspath(os.path.join(_CURRENT_DIR, ".."))
+
+    data_dir = os.environ.get("DATA_DIR", os.path.join(project_root, "data"))
+    return Path(data_dir) / relative
 
 
 ENRICHED_DATASET_FILE: Path = _resolve(os.getenv("ENRICHED_DATASET_FILE"))

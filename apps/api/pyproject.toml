@@ -12,21 +12,21 @@ dependencies = [
     "pandas",
     "python-dotenv",
     "rank-bm25",
+    "scikit-learn",
     "torch",
     "transformers",
+    "umap-learn",
     "uvicorn[standard]",
 ]
 
 [dependency-groups]
-# umap-learn + scikit-learn are only needed by `scripts/build_atlas.py`, which runs offline to
-# precompute the 2D atlas projection. Keeping them out of [project.dependencies] mirrors crucible's
-# streamlit workaround: `moon docker setup` installs only main deps, so the served image stays lean.
+# umap-learn + scikit-learn build the 2D atlas (src/build_atlas.py). The container builds the atlas
+# at startup (scripts/entrypoint.sh) when it is absent from the PVC, so they now ship in the serving
+# image via [project.dependencies] rather than being dev-only.
 dev = [
     "black",
     "pylint",
     "ruff",
-    "scikit-learn",
-    "umap-learn",
 ]
 
 [tool.black]
