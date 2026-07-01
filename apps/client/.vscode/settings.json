@@ -1,0 +1,38 @@
+{
+  "editor.formatOnSave": true,
+  // Specialized save actions handled specifically by the ESLint engine.
+  "editor.codeActionsOnSave": {
+    // Applies ESLint autofixes (unused vars, hook rules, etc.) on save.
+    "source.fixAll.eslint": "explicit"
+  },
+  // Assigns Prettier as the primary tool for code formatting.
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "editor.rulers": [120],
+  "files.trimTrailingWhitespace": true,
+  // Ensures every file ends with a blank line as per POSIX/standard conventions.
+  "files.insertFinalNewline": true,
+  "editor.formatOnPaste": true,
+  "js/ts.preferences.importModuleSpecifier": "non-relative",
+  "js/ts.updateImportsOnFileMove.enabled": "always",
+  "js/ts.inlayHints.functionLikeReturnTypes.enabled": true,
+  "js/ts.inlayHints.parameterNames.enabled": "all",
+  "js/ts.inlayHints.variableTypes.enabled": true,
+  // ESLint reads the flat config in this package.
+  "eslint.useFlatConfig": true,
+  "eslint.workingDirectories": [{ "mode": "auto" }],
+  "[typescript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[javascript]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[scss]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "[css]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
