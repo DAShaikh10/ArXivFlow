@@ -7,6 +7,10 @@ SPECTER2 ad-hoc query encoder — the query-time half of Semantic Search v2.
 import threading
 from typing import List
 
+import torch
+from adapters import AutoAdapterModel
+from transformers import AutoTokenizer
+
 from . import config
 
 
@@ -54,17 +58,8 @@ class Specter2QueryEncoder:
             if self._model is not None:
                 return
 
-            # Imported here, not at module top, so torch is only paid for when dense search runs.
-            import torch
-            from adapters import AutoAdapterModel
-            from transformers import AutoTokenizer
-
             device = torch.device(
-                "cuda"
-                if torch.cuda.is_available()
-                else "mps"
-                if torch.backends.mps.is_available()
-                else "cpu"
+                "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
             )
 
             tokenizer = AutoTokenizer.from_pretrained(config.SPECTER2_BASE_MODEL)
@@ -93,8 +88,6 @@ class Specter2QueryEncoder:
         """
 
         self._ensure_loaded()
-
-        import torch
 
         inputs = self._tokenizer(
             [query],

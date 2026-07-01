@@ -42,11 +42,7 @@ SEARCH_RRF_K: int = int(os.getenv("SEARCH_RRF_K"))
 API_HOST: str = os.getenv("API_HOST")
 API_PORT: int = int(os.getenv("API_PORT"))
 
-CORS_ORIGINS: list[str] = [
-    origin.strip()
-    for origin in os.getenv("CORS_ORIGINS").split(",")
-    if origin.strip()
-]
+CORS_ORIGINS: list[str] = [origin.strip() for origin in os.getenv("CORS_ORIGINS").split(",") if origin.strip()]
 
 # Atlas projection knobs (consumed by src/build_atlas.py only).
 ATLAS_CLUSTERS: int = int(os.getenv("ATLAS_CLUSTERS"))

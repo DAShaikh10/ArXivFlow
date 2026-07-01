@@ -56,6 +56,9 @@ def _year_of(published_date: Optional[str]) -> Optional[int]:
     return int(published_date[:4])
 
 
+# pylint: disable=too-many-instance-attributes
+
+
 class DataStore:
     """Owns the loaded corpus, embedding collection, and atlas projection."""
 
@@ -77,7 +80,9 @@ class DataStore:
         self._bm25_row: Dict[str, int] = {}
 
     def load(self) -> None:
-        """Load every artifact. Raises if the dataset or embeddings are missing; atlas is optional."""
+        """
+        Load every artifact. Raises if the dataset or embeddings are missing; atlas is optional.
+        """
 
         self._load_dataset()
         self._load_embeddings()
@@ -174,9 +179,17 @@ class DataStore:
 
     @property
     def atlas_ready(self) -> bool:
+        """
+        Whether the 2D atlas projection loaded and can be served.
+        """
+
         return bool(self._atlas_points)
 
     def counts(self) -> tuple[int, int]:
+        """
+        `(paper_count, embedding_count)` for the health probe.
+        """
+
         embeddings = self._collection.count() if self._collection else 0
         return len(self._papers), embeddings
 
@@ -210,6 +223,10 @@ class DataStore:
         }
 
     def categories(self) -> List[dict]:
+        """
+        The atlas cluster catalogue (id + label) exposed to the client.
+        """
+
         return self._categories
 
     def years(self) -> List[int]:
@@ -219,6 +236,8 @@ class DataStore:
         """
 
         return sorted({paper["_year"] for paper in self._papers if paper.get("_year")})
+
+    # pylint: disable=too-many-arguments,too-many-positional-arguments
 
     def list_papers(
         self,
@@ -266,6 +285,8 @@ class DataStore:
             "took_ms": (time.perf_counter() - started) * 1000,
         }
 
+    # pylint: enable=too-many-arguments,too-many-positional-arguments
+
     def search(self, query: str, k: int = 20, recommender: str = "rrf") -> dict:
         """
         Free-text corpus search (Semantic Search v2), via the chosen recommender.
@@ -290,7 +311,7 @@ class DataStore:
             return self._dense_search(query, k)
         return self._rrf_search(query, k)
 
-    def _rrf_search(self, query: str, k: int) -> dict:
+    def _rrf_search(self, query: str, k: int) -> dict:  # pylint: disable=too-many-locals
         """
         Reciprocal-rank fusion of the dense (SPECTER2 ad-hoc query) and BM25 rankings.
 
@@ -301,8 +322,13 @@ class DataStore:
 
         started = time.perf_counter()
         if self._collection is None or self._bm25 is None or not (query or "").strip():
-            return {"query": query, "recommender": "rrf", "items": [], "total": 0,
-                    "took_ms": (time.perf_counter() - started) * 1000}
+            return {
+                "query": query,
+                "recommender": "rrf",
+                "items": [],
+                "total": 0,
+                "took_ms": (time.perf_counter() - started) * 1000,
+            }
 
         pool = config.SEARCH_FUSION_POOL
 
@@ -313,9 +339,9 @@ class DataStore:
 
         # BM25 ranking over the same corpus.
         scores = self._bm25.get_scores(_tokenize(query))
-        bm25_rows = sorted(
-            (i for i in range(len(scores)) if scores[i] > 0.0), key=lambda i: scores[i], reverse=True
-        )[:pool]
+        bm25_rows = sorted((i for i in range(len(scores)) if scores[i] > 0.0), key=lambda i: scores[i], reverse=True)[
+            :pool
+        ]
         bm25_ids = [self._bm25_ids[i] for i in bm25_rows]
 
         # Reciprocal-rank fusion, then keep only corpus papers.
@@ -323,8 +349,9 @@ class DataStore:
         for ranking in (dense_ids, bm25_ids):
             for rank, paper_id in enumerate(ranking, start=1):
                 fused[paper_id] = fused.get(paper_id, 0.0) + 1.0 / (config.SEARCH_RRF_K + rank)
-        ranked = [(pid, s) for pid, s in sorted(fused.items(), key=lambda kv: kv[1], reverse=True)
-                  if pid in self._by_id][:k]
+        ranked = [
+            (pid, s) for pid, s in sorted(fused.items(), key=lambda kv: kv[1], reverse=True) if pid in self._by_id
+        ][:k]
 
         # Min-max rescale within the result set (consistent with the dense/bm25 badges).
         values = [s for _, s in ranked]
@@ -344,15 +371,20 @@ class DataStore:
             "took_ms": (time.perf_counter() - started) * 1000,
         }
 
-    def _dense_search(self, query: str, k: int) -> dict:
+    def _dense_search(self, query: str, k: int) -> dict:  # pylint: disable=too-many-locals
         """
         SPECTER2 ad-hoc query nearest neighbours: embed the query, rank the corpus by cosine.
         """
 
         started = time.perf_counter()
         if self._collection is None or not (query or "").strip():
-            return {"query": query, "recommender": "dense", "items": [], "total": 0,
-                    "took_ms": (time.perf_counter() - started) * 1000}
+            return {
+                "query": query,
+                "recommender": "dense",
+                "items": [],
+                "total": 0,
+                "took_ms": (time.perf_counter() - started) * 1000,
+            }
 
         vector = query_encoder.embed(query)
         result = self._collection.query(query_embeddings=[vector], n_results=k, include=["distances"])
@@ -362,8 +394,9 @@ class DataStore:
         # Chroma returns cosine distance in [0, 2]; similarity = 1 - distance. Cross-adapter cosines sit
         # in a narrow high band (~0.8), so we min-max rescale within the result set — top hit -> 1.0,
         # last -> 0.0 — to convey ranking confidence in the badge (as BM25's top-normalization does).
-        kept = [(paper_id, 1.0 - float(distance)) for paper_id, distance in zip(ids, distances)
-                if paper_id in self._by_id]
+        kept = [
+            (paper_id, 1.0 - float(distance)) for paper_id, distance in zip(ids, distances) if paper_id in self._by_id
+        ]
         sims = [sim for _, sim in kept]
         hi, lo = (max(sims), min(sims)) if sims else (0.0, 0.0)
         span = hi - lo
@@ -392,8 +425,13 @@ class DataStore:
         started = time.perf_counter()
         tokens = _tokenize(query or "")
         if self._bm25 is None or not tokens:
-            return {"query": query, "recommender": "bm25", "items": [], "total": 0,
-                    "took_ms": (time.perf_counter() - started) * 1000}
+            return {
+                "query": query,
+                "recommender": "bm25",
+                "items": [],
+                "total": 0,
+                "took_ms": (time.perf_counter() - started) * 1000,
+            }
 
         scores = self._bm25.get_scores(tokens)
         ranked = sorted(
@@ -582,12 +620,18 @@ class DataStore:
         }
 
     def atlas(self) -> dict:
+        """
+        The precomputed 2D atlas payload (points + categories + count).
+        """
+
         return {
             "points": self._atlas_points,
             "categories": self._categories,
             "count": len(self._atlas_points),
         }
 
+
+# pylint: enable=too-many-instance-attributes
 
 # Module-level singleton, populated by the FastAPI lifespan handler.
 store = DataStore()

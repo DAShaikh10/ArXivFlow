@@ -32,6 +32,9 @@ def list_years() -> list[int]:
     return store.years()
 
 
+# pylint: disable=too-many-arguments,too-many-positional-arguments
+
+
 @router.get("/papers", response_model=PaperListResponse)
 def list_papers(
     sort: str = Query("cited", pattern="^(cited|newest|title)$"),
@@ -57,6 +60,9 @@ def list_papers(
             offset=offset,
         )
     )
+
+
+# pylint: enable=too-many-arguments,too-many-positional-arguments
 
 
 @router.get("/papers/{arxiv_id}", response_model=PaperDetail)

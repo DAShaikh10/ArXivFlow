@@ -5,3 +5,78 @@ project:
   name: api
   description: ArXivFlow backend — paper listings & SPECTER2 embedding neighbors over ChromaDB.
   maintainers: ["@DAShaikh10"]
+
+stack: "backend"
+tags:
+  - bm25
+  - chromadb
+  - fastapi
+  - python
+  - specter2
+  - uv
+
+docker:
+  file:
+    # moon requires bash, curl and uv requires python and hence this is the minimal image for build stages.
+    image: python:3.14-slim
+    template: "apps/api/Dockerfile.tera"
+  scaffold:
+    configsPhaseGlobs:
+      - "pyproject.toml"
+      - "uv.lock"
+    sourcesPhaseGlobs:
+      - "src/**/*"
+
+tasks:
+  atlas:
+    command: uv run -m src.build_atlas
+    description: "Precompute the 2D embedding atlas (UMAP + KMeans over SPECTER2 vectors) to data/embeddings/atlas.json. Restart the API afterwards to serve it (no hot-reload)."
+
+  clean:
+    command: bash
+    args:
+      - scripts/clean.sh
+    description: Clean virtualenvs, Python cache, and uv lockfiles.
+
+  dev:
+    command: uv run -m src.main
+    description: "Boot the FastAPI server. No hot-reload — restart to pick up code changes."
+    options:
+      persistent: true
+
+  dockerize:
+    command: docker build
+    args:
+      - --platform
+      - linux/amd64
+      - -t
+      - dashaikh10/arxivflow-api:latest
+      - -f
+      - apps/api/Dockerfile
+      - .
+    description: Build the ArXivFlow API Docker image. Use with `-- --no-cache` for a fresh build.
+    options:
+      # Docker command needs to be executed from the workspace per moon's requirements.
+      runFromWorkspaceRoot: true
+
+  format:
+    command: black .
+    description: Format code using Black.
+
+  format-check:
+    command: black --check .
+    description: Check code formatting using Black.
+
+  lint:
+    command: pylint .
+    description: Lint code using Pylint.
+
+  publish:
+    command: docker push dashaikh10/arxivflow-api:latest
+    description: Publish the ArXivFlow API Docker image to DockerHub.
+    deps:
+      - dockerize
+
+  sync:
+    command: uv sync
+    description: Sync (create .venv, install missing dependencies) the project environment.
