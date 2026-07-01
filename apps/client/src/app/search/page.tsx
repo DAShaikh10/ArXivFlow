@@ -17,7 +17,7 @@ const SAMPLE_QUERIES = [
   "retrieval-augmented question answering",
 ];
 
-const EMPTY: SearchResponse = { query: "", recommender: "dense", items: [], total: 0, took_ms: 0 };
+const EMPTY: SearchResponse = { query: "", recommender: "rrf", items: [], total: 0, took_ms: 0 };
 
 export default function SearchPage() {
   const [input, setInput] = useState("");
@@ -58,8 +58,8 @@ export default function SearchPage() {
           <span className="sv2-h1-b">We&rsquo;ll find the paper.</span>
         </h1>
         <p className="sv2-lede">
-          Type a natural-language query and we&rsquo;ll rank the corpus by <em>meaning</em> — SPECTER2 embeds your
-          query into the same space as every paper and returns the closest work, not just keyword matches.
+          Type a natural-language query and we&rsquo;ll rank the corpus by fusing two signals — SPECTER2 semantic
+          similarity and BM25 keyword relevance — so results match on meaning <em>and</em> wording.
         </p>
 
         <form

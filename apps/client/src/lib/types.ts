@@ -62,13 +62,13 @@ export interface NeighborsResponse {
 }
 
 export interface SearchResult extends PaperSummary {
-  /** Per-query-normalised relevance (0..1): the top hit is 1.0 and the rest descend. */
+  /** Per-result-set-normalised relevance (0..1): the top hit is 1.0 and the rest descend. */
   score: number;
 }
 
 export interface SearchResponse {
   query: string;
-  /** Echoes the recommender that produced these results (currently "bm25"). */
+  /** Echoes the recommender that produced these results ("dense" | "bm25"). */
   recommender: string;
   items: SearchResult[];
   total: number;
