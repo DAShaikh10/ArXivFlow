@@ -13,3 +13,45 @@ tags:
   - react
   - scss
   - typescript
+
+docker:
+  file:
+    image: oven/bun:1
+    template: "apps/client/Dockerfile.tera"
+  scaffold:
+    configsPhaseGlobs:
+      - "package.json"
+      - "bun.lock"
+      - "bunfig.toml"
+    sourcesPhaseGlobs:
+      - "src/**/*"
+      - "public/**/*"
+      - "next.config.ts"
+      - "tsconfig.json"
+      - "next-env.d.ts"
+
+tasks:
+  dev:
+    command: bun run dev
+    description: Start the ArXivFlow client in development mode.
+
+  dockerize:
+    command: docker build
+    args:
+      - --platform
+      - linux/amd64
+      - -t
+      - dashaikh10/arxivflow-client:latest
+      - -f
+      - apps/client/Dockerfile
+      - .
+    description: Build the ArXivFlow client Docker image. Use with `-- --no-cache` for a fresh build.
+    options:
+      # Docker command needs to be executed from the workspace per moon's requirements.
+      runFromWorkspaceRoot: true
+
+  publish:
+    command: docker push dashaikh10/arxivflow-client:latest
+    description: Publish the ArXivFlow client Docker image to DockerHub.
+    deps:
+      - dockerize
