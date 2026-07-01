@@ -1,0 +1,25 @@
+{
+  "editor.formatOnSave": true,
+  // Specialized save actions handled specifically by the Ruff engine.
+  "editor.codeActionsOnSave": {
+    // Sorts and removes unused import statements automatically.
+    "source.organizeImports.ruff": "explicit",
+    // Uses Ruff to fix lint violations (like unused variables) on save.
+    "source.fixAll.ruff": "explicit"
+  },
+  // Assigns the Black extension as the primary tool for code formatting.
+  "editor.defaultFormatter": "ms-python.black-formatter",
+  "editor.rulers": [120],
+  "files.trimTrailingWhitespace": true,
+  // Ensures every file ends with a blank line as per POSIX/standard conventions.
+  "files.insertFinalNewline": true,
+  "python.defaultInterpreterPath": "${workspaceFolder:compass}/.venv/bin/python",
+  "editor.formatOnPaste": true,
+  "python.analysis.inlayHints.functionReturnTypes": true,
+  "python.analysis.inlayHints.pytestParameters": true,
+  "python.analysis.inlayHints.variableTypes": true,
+  "python.analysis.inlayHints.callArgumentNames": "all",
+  "[markdown]": {
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  }
+}
