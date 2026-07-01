@@ -1,3 +1,9 @@
+# Bun
+**/bun.lockb
+
+# Dependencies.
+**/node_modules/
+
 # Environment variables
 .env
 !.env.example
@@ -19,8 +25,19 @@ __pycache__/
 # Data.
 data/
 
+# Next.js build output.
+**/.next/
+
 # Logging.
 *.log
 
+# Production artifacts
+**/build/
+**/dist/
+
+# TypeScript
+**/*.tsbuildinfo
+**/next-env.d.ts
+
 # WandB.
-wandb/
+**/wandb/
