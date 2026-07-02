@@ -60,3 +60,8 @@ target-version = "py314"
 
 [tool.ruff.lint]
 extend-select = ["I"]
+
+[tool.ruff.lint.per-file-ignores]
+# The Streamlit app must insert the compass root onto sys.path before its package imports (see the
+# comment there), so E402 is unavoidable — this mirrors the file-level pylint wrong-import-position disable.
+"src/lib/relatedness/app.py" = ["E402"]
