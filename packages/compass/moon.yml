@@ -26,6 +26,34 @@ tasks:
       - scripts/clean.sh
     description: Clean virtualenvs, Python cache, and uv lockfiles.
 
+  evaluate:
+    command: uv run -m src.lib.eval.main
+    description: "Evaluate the Tier 0 recommender (Recall@k / nDCG@k / MRR) against proxy ground truth."
+
+  evaluate-tiers:
+    command: uv run -m src.lib.recommend.eval
+    description: "Ablate Tier 1 signals + RRF fusion vs the Tier 0 baseline against proxy ground truth."
+
+  evaluate-rerank:
+    command: uv run -m src.lib.recommend.rerank_eval
+    description: "Measure the Stage 2 cross-encoder reranker's lift over the Stage 1 pool on a sample."
+
+  evaluate-search:
+    command: uv run --group perturb-text -m src.lib.eval.search_eval
+    description: "Query->doc search eval: SPECTER2 adhoc_query (dense) vs BM25 vs RRF on tag-overlap gold."
+
+  perturb:
+    command: uv run -m src.lib.recommend.perturb
+    description: "Track A — query-perturbation robustness: per-signal ranking stability + Δrecall. Set PERTURB_TEXT=1 (with --group perturb-text) for real typo/word-drop text perturbation."
+
+  robustness:
+    command: uv run -m src.lib.recommend.robustness
+    description: "Track B — conclusion robustness: bootstrap CIs on verdict gaps + knob-sweep winner stability. Set ROBUSTNESS_RERANKER=1 to bootstrap the reranker verdict."
+
+  relatedness:
+    command: uv run --group app streamlit run src/lib/relatedness/app.py
+    description: "Interactive corpus-relatedness audit (density per definition + cross-signal agreement/lift)."
+
   format:
     command: black .
     description: Format code using Black.

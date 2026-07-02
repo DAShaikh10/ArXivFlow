@@ -9,6 +9,7 @@ dependencies = [
     "numpy",
     "python-dotenv",
     "rank-bm25",
+    "scipy",
     "sentence-transformers",
 ]
 
@@ -24,6 +25,13 @@ app = [
     "pandas",
     "streamlit",
 ]
+# Real free-text query perturbation (src/lib/recommend/embed.py) re-embeds typo'd/paraphrased queries
+# through the SPECTER2 adhoc-query adapter, which needs adapter-transformers. The model-free perturbation
+# harness (Gaussian noise / token dropout) does not, so this stays optional and out of the lean default.
+# Run: `uv run --group perturb-text -m src.lib.recommend.perturb` with PERTURB_TEXT=1.
+perturb-text = [
+    "adapters",
+]
 
 [tool.black]
 line-length = 120
@@ -34,6 +42,14 @@ ignore = [
     ".venv",
     "__pycache__"
 ]
+# pandas/streamlit live in the optional `app` group, so they are absent from the lean default env
+# pylint runs against. Treat them as unresolvable rather than flagging import-error.
+ignored-modules = ["pandas", "streamlit"]
+
+[tool.pylint.messages_control]
+# duplicate-code is a whole-module check that inline disables cannot scope: the two hits here are a
+# four-line JSONL reader and the report-writing tail, trivial idioms not worth a shared abstraction.
+disable = ["duplicate-code"]
 
 [tool.pylint.format]
 max-line-length = 120
